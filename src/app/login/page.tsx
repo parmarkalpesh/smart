@@ -10,9 +10,23 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { QrCode } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function LoginPage() {
-  const { handleGoogleLogin } = useAuth();
+  const { handleGoogleLogin, isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [isAuthenticated, loading, router]);
+
+  // To prevent hydration errors, don't render anything until auth state is confirmed
+  if (loading || isAuthenticated) {
+    return null; 
+  }
 
   const GoogleIcon = () => (
     <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48">
