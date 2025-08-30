@@ -1,3 +1,4 @@
+
 'use client';
 
 import { InventoryItem } from '@/lib/types';
@@ -14,7 +15,7 @@ export default function DashboardStats({ items }: DashboardStatsProps) {
     const totalItems = items.length;
     const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
     const lowStockItems = items.filter(
-      (item) => item.status === 'Low Stock' || (item.quantity > 0 && item.quantity <= 5)
+      (item) => item.status === 'Low Stock' || (item.reorderThreshold && item.quantity <= item.reorderThreshold)
     ).length;
     const outOfStockItems = items.filter((item) => item.quantity === 0).length;
 

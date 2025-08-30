@@ -11,7 +11,7 @@ export default function NotificationsClientPage() {
     const { items } = useInventory();
     
     const hasNotifications = useMemo(() => {
-        const lowStock = items.some(item => item.status === 'Low Stock' || (item.quantity > 0 && item.quantity <= 5));
+        const lowStock = items.some(item => item.status === 'Low Stock' || (item.reorderThreshold && item.quantity <= item.reorderThreshold));
         
         const thirtyDaysFromNow = new Date();
         thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);

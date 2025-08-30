@@ -22,6 +22,8 @@ export interface InventoryItem {
   supplier?: string;
   nextMaintenanceDate?: string; // ISO string for maintenance
   voiceNotes?: VoiceNote[];
+  reorderThreshold?: number;
+  reorderQuantity?: number;
 }
 
 export interface GoogleUser {

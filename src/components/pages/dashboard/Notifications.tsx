@@ -16,7 +16,7 @@ interface NotificationsProps {
 export default function Notifications({ items }: NotificationsProps) {
   const lowStockItems = useMemo(() => {
     return items.filter(
-      (item) => item.status === 'Low Stock' || (item.quantity > 0 && item.quantity <= 5)
+      (item) => item.status === 'Low Stock' || (item.reorderThreshold && item.quantity <= item.reorderThreshold)
     );
   }, [items]);
 

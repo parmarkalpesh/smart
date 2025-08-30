@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { InventoryItem } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import {ImageIcon, Fingerprint, MapPin, Building, Calendar} from 'lucide-react';
+import {ImageIcon, Fingerprint, MapPin, Building, Calendar, Package, AlertCircle, ShoppingCart} from 'lucide-react';
 
 export default function ItemClientPage({ itemId }: { itemId: string }) {
   const { getItemById } = useInventory();
@@ -82,6 +82,14 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
                     <CardTitle>Item Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
+                     <div className="flex items-start justify-between">
+                        <div className='flex items-center gap-2'>
+                           <Package className="h-4 w-4 text-muted-foreground" />
+                           <span className="text-muted-foreground">Quantity</span>
+                        </div>
+                        <span className="font-mono bg-muted px-2 py-1 rounded-md text-xs">{item.quantity}</span>
+                    </div>
+                    <Separator />
                     <div className="flex items-start justify-between">
                         <div className='flex items-center gap-2'>
                            <Fingerprint className="h-4 w-4 text-muted-foreground" />
@@ -121,6 +129,30 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
                         </div>
                         <span className='font-medium'>{new Date(item.dateAdded).toLocaleDateString()}</span>
                     </div>
+                     {item.reorderThreshold !== undefined && (
+                        <>
+                        <Separator />
+                        <div className="flex items-center justify-between">
+                             <div className='flex items-center gap-2'>
+                                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-muted-foreground">Reorder Threshold</span>
+                            </div>
+                            <span className='font-medium'>{item.reorderThreshold}</span>
+                        </div>
+                        </>
+                    )}
+                     {item.reorderQuantity !== undefined && (
+                        <>
+                        <Separator />
+                        <div className="flex items-center justify-between">
+                             <div className='flex items-center gap-2'>
+                                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-muted-foreground">Reorder Quantity</span>
+                            </div>
+                            <span className='font-medium'>{item.reorderQuantity}</span>
+                        </div>
+                        </>
+                    )}
                 </CardContent>
             </Card>
         </div>
@@ -134,14 +166,17 @@ function ItemSkeleton() {
             <div className="md:col-span-2 space-y-6">
                 <Card>
                     <CardHeader>
-                        <Skeleton className="h-8 w-1/2" />
+                         <Skeleton className="h-8 w-1/2" />
                         <Skeleton className="h-4 w-3/4" />
                     </CardHeader>
                     <CardContent className="space-y-8">
-                        <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
-                        <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
-                        <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
-                        <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
+                            <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
+                            <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
+                            <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
+                        </div>
+                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="flex justify-end"><Skeleton className="h-10 w-24" /></div>
                     </CardContent>
                 </Card>

@@ -26,7 +26,8 @@ import {
   Power,
   Bell,
   Shield,
-  User
+  User,
+  ShoppingCart
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { useInventory } from '@/hooks/useInventory';
@@ -50,7 +51,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const notificationCount = useMemo(() => {
     const lowStockItems = items.filter(
-      (item) => item.status === 'Low Stock' || (item.quantity > 0 && item.quantity <= 5)
+      (item) => item.status === 'Low Stock' || (item.reorderThreshold && item.quantity <= item.reorderThreshold)
     );
 
     const thirtyDaysFromNow = new Date();
@@ -136,6 +137,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <Bell />
                   <span>Notifications</span>
                    {notificationCount > 0 && <SidebarMenuBadge>{notificationCount}</SidebarMenuBadge>}
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/purchasing')}
+                tooltip="Purchasing"
+              >
+                <Link href="/purchasing">
+                  <ShoppingCart />
+                  <span>Purchasing</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
