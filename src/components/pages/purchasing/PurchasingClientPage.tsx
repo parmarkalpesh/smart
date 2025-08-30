@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { marked } from 'marked';
 
@@ -53,6 +52,7 @@ export default function PurchasingClientPage() {
     if (!reportRef.current) return;
 
     try {
+        const { default: jsPDF } = await import('jspdf');
         const canvas = await html2canvas(reportRef.current, {
             scale: 2, // Higher scale for better quality
         });
