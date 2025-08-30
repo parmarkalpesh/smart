@@ -83,7 +83,7 @@ const updateItemWithVoiceFlow = ai.defineFlow(
   async (input) => {
     
     const llmResponse = await updatePrompt(input);
-    const toolRequest = llmResponse.toolRequest();
+    const toolRequest = llmResponse.toolRequest;
     
     if (toolRequest?.name === 'updateInventoryItem' && toolRequest.input) {
         // The validated and structured data from the tool call is our output.
