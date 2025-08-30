@@ -11,6 +11,7 @@ import { Wand2, FileText, TriangleAlert } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import InventoryChart from './InventoryChart';
 
 export default function ReportsClientPage() {
   const { userRole, loading: authLoading } = useAuth();
@@ -63,6 +64,8 @@ export default function ReportsClientPage() {
 
   return (
     <div className="space-y-6">
+       <InventoryChart items={items} />
+
       <Card>
         <CardHeader>
           <CardTitle>Automated Reporting Tool</CardTitle>
