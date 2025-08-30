@@ -1,3 +1,4 @@
+
 import AppLayout from '@/components/AppLayout';
 import InventoryClientPage from '@/components/pages/dashboard/InventoryClientPage';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';

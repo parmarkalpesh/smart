@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -15,6 +15,7 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
+  SidebarMenuBadge,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,12 +24,32 @@ import {
   BarChart2,
   QrCode,
   Power,
+  Bell,
 } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { useInventory } from '@/hooks/useInventory';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isActive = (path: string) => pathname.startsWith(path);
+  const isActive = (path: string) => pathname === path;
+  const { items } = useInventory();
+
+  const notificationCount = useMemo(() => {
+    const lowStockItems = items.filter(
+      (item) => item.status === 'Low Stock' || (item.quantity > 0 && item.quantity <= 5)
+    );
+
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    const expiringSoonItems = items.filter(item => {
+        if (!item.expiryDate) return false;
+        const expiryDate = new Date(item.expiryDate);
+        return expiryDate > new Date() && expiryDate <= thirtyDaysFromNow;
+    });
+
+    return lowStockItems.length + expiringSoonItems.length;
+  }, [items]);
+
 
   return (
     <SidebarProvider>
@@ -48,10 +69,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
-                isActive={isActive('/dashboard')}
+                isActive={isActive('/')}
                 tooltip="Dashboard"
               >
-                <Link href="/dashboard">
+                <Link href="/">
                   <LayoutDashboard />
                   <span>Dashboard</span>
                 </Link>
@@ -66,6 +87,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/scanner">
                   <ScanLine />
                   <span>Scan Item</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/notifications')}
+                tooltip="Notifications"
+              >
+                <Link href="/notifications">
+                  <Bell />
+                  <span>Notifications</span>
+                   {notificationCount > 0 && <SidebarMenuBadge>{notificationCount}</SidebarMenuBadge>}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
