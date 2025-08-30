@@ -32,7 +32,7 @@ const formSchema = z.object({
   type: z.string().min(2, { message: 'Type must be at least 2 characters.' }),
   quantity: z.coerce.number().min(0, { message: 'Quantity cannot be negative.' }),
   status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock']),
-  imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional(),
+  imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
@@ -59,6 +59,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
   });
 
   const [imagePreview, setImagePreview] = useState<string | undefined>(item?.imageUrl);
+  const [isImageValid, setIsImageValid] = useState(true);
 
   function onSubmit(values: InventoryFormValues) {
     if (isEditMode) {
@@ -74,10 +75,18 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     form.setValue('imageUrl', value);
-    if (form.getFieldState('imageUrl').invalid) {
-      setImagePreview(undefined);
-    } else {
-      setImagePreview(value);
+    if(value === '') {
+        setImagePreview(undefined);
+        setIsImageValid(true);
+        return;
+    }
+    try {
+        new URL(value);
+        setImagePreview(value);
+        setIsImageValid(true);
+    } catch {
+        setImagePreview(undefined);
+        setIsImageValid(false);
     }
   };
 
@@ -166,7 +175,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
             </FormItem>
           )}
         />
-        {imagePreview && (
+        {imagePreview && isImageValid && (
           <div>
              <FormLabel>Image Preview</FormLabel>
             <div className="mt-2 relative aspect-video w-full max-w-sm">
