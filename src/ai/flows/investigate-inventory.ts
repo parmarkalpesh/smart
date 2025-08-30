@@ -101,23 +101,26 @@ const investigateInventoryFlow = ai.defineFlow(
   async (input) => {
     const { query, inventoryData, history } = input;
     
-    // Construct the full prompt, including history and the latest query.
-    const fullPrompt: Message[] = [
-      ...(history || []).map(msg => ({
-          role: msg.role,
-          content: msg.content,
-      })),
-      {
-        role: 'user',
-        content: [
-            { text: query },
-            { toolRequest: { name: 'getInventoryData', input: JSON.parse(inventoryData) } },
-        ]
-      },
-    ];
+    const fullHistory: Message[] = (history || []).map(msg => ({
+      role: msg.role as 'user' | 'model',
+      content: msg.content,
+    }));
 
     // Generate the AI's response.
-    const llmResponse = await investigatorPrompt(fullPrompt);
+    const llmResponse = await investigatorPrompt({
+        history: fullHistory,
+        messages: [
+            {
+                role: 'user',
+                content: query
+            }
+        ],
+        tools: [getInventoryData],
+        toolContext: {
+          // Provide the full inventory data to the tool's context
+          getInventoryData: JSON.parse(inventoryData)
+        }
+    });
 
     // Return the generated text content.
     return llmResponse.text;
