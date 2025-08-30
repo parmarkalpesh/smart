@@ -61,9 +61,8 @@ const updatePrompt = ai.definePrompt(
         prompt: `You are a voice assistant for an inventory management system.
 A user has provided a text command to update an inventory item.
 Analyze the text and determine which fields to update.
-Use the 'updateInventoryItem' tool to specify the new values.
-If the user's command is unclear or does not seem to relate to updating an inventory item,
-call the tool with an empty object.
+If the command is a clear instruction to update an item, use the 'updateInventoryItem' tool to specify the new values.
+If the user's command is unclear, ambiguous, or does not seem to relate to updating an inventory item, respond with a clarifying question or a message indicating you can't process the request. Do not use the tool in this case.
 
 Text command: {{{command}}}`,
         config: {
@@ -83,10 +82,7 @@ const updateItemWithVoiceFlow = ai.defineFlow(
   },
   async (input) => {
     
-    const llmResponse = await updatePrompt(input, {
-        toolChoice: 'required', // Force the model to use the tool.
-    });
-
+    const llmResponse = await updatePrompt(input);
     const toolRequest = llmResponse.toolRequest();
     
     if (toolRequest?.name === 'updateInventoryItem' && toolRequest.input) {
@@ -95,7 +91,8 @@ const updateItemWithVoiceFlow = ai.defineFlow(
         return UpdateItemWithVoiceOutputSchema.parse(toolRequest.input);
     }
 
-    // If the tool wasn't called correctly or the input was empty, return an empty object.
+    // If the tool wasn't called or the input was empty, it means the model
+    // decided the command was unclear. Return an empty object to signal this to the client.
     return {};
   }
 );
