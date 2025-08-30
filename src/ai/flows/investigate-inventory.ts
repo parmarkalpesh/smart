@@ -109,12 +109,9 @@ const investigateInventoryFlow = ai.defineFlow(
       })),
       {
         role: 'user',
-        content: query,
-        toolRequest: [
-            {
-                name: 'getInventoryData',
-                input: JSON.parse(inventoryData),
-            }
+        content: [
+            { text: query },
+            { toolRequest: { name: 'getInventoryData', input: JSON.parse(inventoryData) } },
         ]
       },
     ];
