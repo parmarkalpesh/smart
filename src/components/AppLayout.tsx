@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   ScanLine,
-  BarChart2,
+  MessageSquareHeart,
   QrCode,
   Power,
   Bell,
@@ -155,12 +155,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
-                isActive={isActive('/reports')}
-                tooltip="AI Reports"
+                isActive={isActive('/investigator')}
+                tooltip="AI Investigator"
               >
-                <Link href="/reports">
-                  <BarChart2 />
-                  <span>AI Reports</span>
+                <Link href="/investigator">
+                  <MessageSquareHeart />
+                  <span>Investigator</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
