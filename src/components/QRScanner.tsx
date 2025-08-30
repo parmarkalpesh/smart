@@ -11,10 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
-import { Camera, TriangleAlert, Loader2 } from 'lucide-react';
+import { Camera, TriangleAlert, Loader2, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useInventory } from '@/hooks/useInventory';
 import { InventoryItem } from '@/lib/types';
+import Image from 'next/image';
 
 export default function QRScanner() {
   const router = useRouter();
@@ -164,6 +165,15 @@ export default function QRScanner() {
                 <CardTitle>Scanned Item Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+                 {scannedItem.imageUrl ? (
+                    <div className="aspect-video relative">
+                        <Image src={scannedItem.imageUrl} alt={scannedItem.name} fill className="rounded-md object-cover" />
+                    </div>
+                ) : (
+                    <div className="aspect-video flex items-center justify-center bg-muted rounded-md">
+                        <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                )}
                 <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-start">
                         <span className="font-semibold text-lg">{scannedItem.name}</span>
@@ -181,6 +191,10 @@ export default function QRScanner() {
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Item ID</span>
                         <span className="font-mono text-xs">{scannedItem.id}</span>
+                    </div>
+                     <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Date Added</span>
+                        <span>{new Date(scannedItem.dateAdded).toLocaleDateString()}</span>
                     </div>
                 </div>
                 <div className="flex gap-2">
