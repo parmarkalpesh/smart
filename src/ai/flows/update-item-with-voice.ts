@@ -1,10 +1,10 @@
 
 'use server';
 /**
- * @fileOverview Updates an inventory item using a text command.
+ * @fileOverview Updates an inventory item using a voice command.
  *
  * - updateItemWithVoice - A function that handles the voice command processing.
- * - UpdateItemWithTextInput - The input type for the function.
+ * - UpdateItemWithVoiceInput - The input type for the function.
  * - UpdateItemWithVoiceOutput - The return type for the function.
  */
 
@@ -12,11 +12,15 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 // The input schema for the flow
-const UpdateItemWithTextInputSchema = z.object({
-  command: z.string().describe('A text command from the user to update an inventory item.'),
+const UpdateItemWithVoiceInputSchema = z.object({
+  audioDataUri: z
+    .string()
+    .describe(
+      "An audio recording of the user's command, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
   itemId: z.string().describe('The ID of the inventory item to update.'),
 });
-export type UpdateItemWithTextInput = z.infer<typeof UpdateItemWithTextInputSchema>;
+export type UpdateItemWithVoiceInput = z.infer<typeof UpdateItemWithVoiceInputSchema>;
 
 // The output schema defines the possible fields that can be updated.
 // It's a partial object, so only the fields mentioned in the voice command will be present.
@@ -27,12 +31,13 @@ const UpdateItemWithVoiceOutputSchema = z.object({
     status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted']).optional(),
     location: z.string().optional(),
     supplier: z.string().optional(),
+    transcription: z.string().describe('The transcription of the audio command.'),
 });
 export type UpdateItemWithVoiceOutput = z.infer<typeof UpdateItemWithVoiceOutputSchema>;
 
 
 // The main exported function that the client will call.
-export async function updateItemWithVoice(input: UpdateItemWithTextInput): Promise<UpdateItemWithVoiceOutput> {
+export async function updateItemWithVoice(input: UpdateItemWithVoiceInput): Promise<UpdateItemWithVoiceOutput> {
   return updateItemWithVoiceFlow(input);
 }
 
@@ -41,29 +46,29 @@ export async function updateItemWithVoice(input: UpdateItemWithTextInput): Promi
 const itemUpdateTool = ai.defineTool(
     {
         name: 'updateInventoryItem',
-        description: 'Updates the fields of an inventory item based on the user\'s text command. Only specify the fields that the user explicitly mentioned to change.',
-        inputSchema: UpdateItemWithVoiceOutputSchema,
+        description: 'Updates the fields of an inventory item based on the user\'s transcribed command. Only specify the fields that the user explicitly mentioned to change.',
+        inputSchema: UpdateItemWithVoiceOutputSchema.omit({ transcription: true }), // The tool doesn't need to return the transcription
         outputSchema: z.any(),
     },
     async (input) => {
-        // In a real-world scenario, you might perform validation or other actions here.
-        // For this implementation, the tool's purpose is to structure the data for the client.
+        // This function is just a schema for the LLM. 
+        // The actual update happens in the client based on the tool's input.
         return input;
     }
 )
 
 const updatePrompt = ai.definePrompt(
     {
-        name: 'updateItemWithTextPrompt',
+        name: 'updateItemWithVoicePrompt',
         tools: [itemUpdateTool],
-        input: { schema: UpdateItemWithTextInputSchema },
+        input: { schema: z.object({ transcription: z.string() }) },
         prompt: `You are a voice assistant for an inventory management system.
-A user has provided a text command to update an inventory item.
+A user has provided a transcribed command to update an inventory item.
 Analyze the text and determine which fields to update.
-If the command is a clear instruction to update an item, use the 'updateInventoryItem' tool to specify the new values.
+Use the 'updateInventoryItem' tool to specify the new values. Do not make up values or fields.
 If the user's command is unclear, ambiguous, or does not seem to relate to updating an inventory item, respond with a clarifying question or a message indicating you can't process the request. Do not use the tool in this case.
 
-Text command: {{{command}}}`,
+Transcribed command: {{{transcription}}}`,
         config: {
             // Lower temperature for more deterministic, structured output
             temperature: 0.1,
@@ -76,22 +81,34 @@ Text command: {{{command}}}`,
 const updateItemWithVoiceFlow = ai.defineFlow(
   {
     name: 'updateItemWithVoiceFlow',
-    inputSchema: UpdateItemWithTextInputSchema,
+    inputSchema: UpdateItemWithVoiceInputSchema,
     outputSchema: UpdateItemWithVoiceOutputSchema,
   },
   async (input) => {
     
-    const llmResponse = await updatePrompt(input);
+    // Step 1: Transcribe the audio
+    const { text: transcription } = await ai.generate({
+      prompt: `Transcribe the following audio note for an inventory system: {{media url="${input.audioDataUri}"}}`,
+    });
+
+    if (!transcription) {
+        throw new Error('Failed to transcribe audio.');
+    }
+
+    // Step 2: Call the update prompt with the transcription
+    const llmResponse = await updatePrompt({ transcription });
     const toolRequest = llmResponse.toolRequest;
     
     if (toolRequest?.name === 'updateInventoryItem' && toolRequest.input) {
-        // The validated and structured data from the tool call is our output.
-        // Zod parse will ensure the types are correct (e.g. quantity is a number)
-        return UpdateItemWithVoiceOutputSchema.parse(toolRequest.input);
+        const updates = UpdateItemWithVoiceOutputSchema.omit({ transcription: true }).parse(toolRequest.input);
+        return {
+            ...updates,
+            transcription, // Return the transcription along with the updates
+        };
     }
 
-    // If the tool wasn't called or the input was empty, it means the model
-    // decided the command was unclear. Return an empty object to signal this to the client.
-    return {};
+    // If the tool wasn't called, it means the model decided the command was unclear.
+    // Return only the transcription so the user can see what the AI heard.
+    return { transcription };
   }
 );

@@ -11,11 +11,9 @@ import { useEffect, useState } from 'react';
 import { InventoryItem, VoiceNote } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import {ImageIcon, Fingerprint, MapPin, Building, Calendar, Mic, Bot} from 'lucide-react';
-import VoiceNoteRecorder from './VoiceNoteRecorder';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import VoiceCommandInput from './VoiceCommandInput';
+import {ImageIcon, Fingerprint, MapPin, Building, Calendar, Bot} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import VoiceCommandProcessor from './VoiceCommandProcessor';
 
 export default function ItemClientPage({ itemId }: { itemId: string }) {
   const { getItemById, updateItem } = useInventory();
@@ -27,27 +25,23 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
     setItem(foundItem);
   }, [itemId, getItemById]);
 
-  const handleNoteAdded = (note: Omit<VoiceNote, 'id' | 'createdAt'>) => {
-    if (!item) return;
-    const newNote: VoiceNote = {
-      ...note,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    const updatedNotes = [...(item.voiceNotes || []), newNote];
-    updateItem(item.id, { voiceNotes: updatedNotes });
-    setItem(prevItem => prevItem ? { ...prevItem, voiceNotes: updatedNotes } : null);
-  }
-
-  const handleVoiceUpdate = (updates: Partial<InventoryItem>) => {
+  const handleVoiceUpdate = (updates: Partial<InventoryItem>, transcription: string) => {
     if (!item) return;
     const updatedItemData = { ...item, ...updates };
     updateItem(item.id, updates);
     setItem(updatedItemData);
      toast({
         title: 'Item Updated by Voice',
-        description: 'The item details have been successfully updated.',
+        description: `Command: "${transcription}"`,
     });
+  }
+
+  const handleVoiceError = (transcription: string | null, error: string) => {
+    toast({
+      variant: 'destructive',
+      title: error,
+      description: transcription ? `Heard: "${transcription}"` : "Could not understand audio. Please try again.",
+    })
   }
 
 
@@ -75,41 +69,10 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Bot /> Voice Command</CardTitle>
-                    <CardDescription>Use your voice to dictate an update command. The transcribed text will appear below. You can then edit it before applying the update.</CardDescription>
+                    <CardDescription>Use your voice to dictate an update command, like "Change status to wasted" or "Update quantity to 25".</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <VoiceCommandInput itemId={item.id} onUpdate={handleVoiceUpdate} />
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Mic />Voice Notes</CardTitle>
-                    <CardDescription>Record and review audio notes for this item. Notes are transcribed and summarized by AI.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <VoiceNoteRecorder onNoteAdded={handleNoteAdded} />
-                   {item.voiceNotes && item.voiceNotes.length > 0 && <Separator />}
-                   <ScrollArea className="h-72">
-                    <div className="space-y-4 pr-4">
-                    {item.voiceNotes?.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(note => (
-                      <Card key={note.id} className="bg-muted/50">
-                        <CardHeader className="pb-2">
-                          <CardDescription>
-                            Recorded on {new Date(note.createdAt).toLocaleString()}
-                          </CardDescription>
-                          <CardTitle className="text-base font-semibold">{note.summary}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <audio controls src={note.audioDataUri} className="w-full" />
-                          <details>
-                              <summary className="text-sm font-medium cursor-pointer">View full transcription</summary>
-                              <p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">{note.transcription}</p>
-                          </details>
-                        </CardContent>
-                      </Card>
-                    ))}
-                    </div>
-                   </ScrollArea>
+                    <VoiceCommandProcessor itemId={item.id} onUpdate={handleVoiceUpdate} onError={handleVoiceError} />
                 </CardContent>
             </Card>
         </div>
@@ -218,7 +181,7 @@ function ItemSkeleton() {
              <div className="space-y-6">
                 <Card>
                     <CardHeader>
-                         <Skeleton className="h-8 w-3/4" />
+                         <Skeleton className="h-6 w-1/2" />
                     </CardHeader>
                      <CardContent>
                         <Skeleton className="w-full aspect-video" />
@@ -226,8 +189,8 @@ function ItemSkeleton() {
                 </Card>
                 <Card>
                     <CardHeader>
-                         <Skeleton className="h-8 w-3/4" />
-                        <Skeleton className="h-4 w-full" />
+                         <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-4 w-3/4" />
                     </CardHeader>
                     <CardContent className="flex items-center justify-center p-6">
                         <Skeleton className="h-40 w-40" />
