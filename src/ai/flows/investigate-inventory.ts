@@ -105,20 +105,17 @@ const investigateInventoryFlow = ai.defineFlow(
     const fullPrompt: Message[] = [
       ...(history || []).map(msg => ({
           role: msg.role,
-          content: [{text: msg.content}],
+          content: msg.content,
       })),
       {
         role: 'user',
-        content: [
-            { text: query },
-            // Provide the inventory data to the context for the tool to use.
-            { data: {
-                // This simulates the result of the `getInventoryData` tool call.
-                // The AI is instructed in the system prompt to use this data.
+        content: query,
+        toolRequest: [
+            {
                 name: 'getInventoryData',
-                value: JSON.parse(inventoryData),
-            }}
-        ],
+                input: JSON.parse(inventoryData),
+            }
+        ]
       },
     ];
 
