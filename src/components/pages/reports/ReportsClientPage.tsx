@@ -74,7 +74,7 @@ export default function ReportsClientPage() {
   };
 
   const getReportTitle = (reportType: ReportType | null) => {
-    if (reportType === 'trends') return 'Future Trends Report';
+    if (reportType === 'trends') return 'Predictive Inventory Analysis';
     if (reportType === 'wastage') return 'Wastage Analysis Report';
     return 'Inventory Analysis Report';
   }
@@ -87,7 +87,7 @@ export default function ReportsClientPage() {
         <CardHeader>
           <CardTitle>Automated Reporting Tool</CardTitle>
           <CardDescription>
-            Use our AI-powered tool to analyze your inventory for future trends or past wastage.
+            Use our AI-powered tool to analyze your inventory for predictive analytics or past wastage.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -95,7 +95,7 @@ export default function ReportsClientPage() {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="trends">
                 <TrendingUp className="mr-2 h-4 w-4" />
-                Future Trends
+                Predictive Analytics
               </TabsTrigger>
               <TabsTrigger value="wastage">
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -104,11 +104,11 @@ export default function ReportsClientPage() {
             </TabsList>
             <TabsContent value="trends" className="pt-4">
                <CardDescription className="mb-4">
-                Analyze your current inventory to get insights on stock status, seasonal trends, and restocking recommendations.
+                Forecast demand, get optimal stock level suggestions, and receive alerts about potential stockouts before they happen.
               </CardDescription>
               <Button onClick={() => handleGenerateReport('trends')} disabled={isPending}>
                 <Wand2 className="mr-2 h-4 w-4" />
-                {isPending && currentReportType === 'trends' ? 'Generating...' : 'Generate Trends Report'}
+                {isPending && currentReportType === 'trends' ? 'Generating...' : 'Generate Predictive Report'}
               </Button>
             </TabsContent>
             <TabsContent value="wastage" className="pt-4">

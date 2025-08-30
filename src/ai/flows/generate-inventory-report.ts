@@ -2,7 +2,7 @@
 // src/ai/flows/generate-inventory-report.ts
 'use server';
 /**
- * @fileOverview Generates a report summarizing the current inventory status and seasonal trends.
+ * @fileOverview Generates a report summarizing current inventory, forecasting future demand, and providing stocking recommendations.
  *
  * - generateInventoryReport - A function that generates the inventory report.
  * - GenerateInventoryReportInput - The input type for the generateInventoryReport function.
@@ -18,7 +18,7 @@ const GenerateInventoryReportInputSchema = z.object({
 export type GenerateInventoryReportInput = z.infer<typeof GenerateInventoryReportInputSchema>;
 
 const GenerateInventoryReportOutputSchema = z.object({
-  report: z.string().describe('A detailed report summarizing the inventory status, including seasonal trends and restocking recommendations, with a markdown table for trending products and waste reduction.'),
+  report: z.string().describe('A detailed report with demand forecasting, optimal stock level suggestions, and a markdown table for trending products and waste reduction.'),
 });
 export type GenerateInventoryReportOutput = z.infer<typeof GenerateInventoryReportOutputSchema>;
 
@@ -30,18 +30,20 @@ const prompt = ai.definePrompt({
   name: 'generateInventoryReportPrompt',
   input: {schema: GenerateInventoryReportInputSchema},
   output: {schema: GenerateInventoryReportOutputSchema},
-  prompt: `You are an AI assistant specialized in inventory management, seasonal trend analysis, and waste reduction strategy.
+  prompt: `You are an expert AI in predictive analytics and inventory management.
 
-You are provided with current inventory data. Analyze this data to generate a comprehensive report.
+You are provided with current inventory data. Your task is to analyze this data to generate a comprehensive "Predictive Inventory Analysis" report.
 
-The report must include the following sections in markdown format:
+The report must be in markdown format and include the following sections:
 
-**1. Overall Inventory Status:**
-- A brief summary of the inventory health.
+**1. Demand Forecast & Stock-out Alerts:**
+- Analyze the provided inventory data to forecast future product demand, considering item types and seasonality.
+- Identify and alert about any items at risk of stocking out soon based on their current quantity and predicted demand.
+- Provide a brief summary of your findings.
 
-**2. Future Trending Products:**
-- A markdown table with columns: "Product Name", "Current Quantity", "Predicted Trend", and "Recommendation".
-- Analyze items based on their type, name, and the current date to predict future and seasonal trends.
+**2. Optimal Stock Level Recommendations:**
+- Based on your forecast, create a markdown table with the columns: "Product Name", "Current Quantity", "Predicted Trend", and "Recommendation".
+- In the "Recommendation" column, suggest optimal stock levels and specific restocking actions (e.g., "Increase stock to 50 units," "Maintain current level," "Reorder 20 units before next month").
 
 **3. Waste Reduction Action Plan:**
 - Identify items with an expiryDate that is approaching (e.g., within the next 30 days).
