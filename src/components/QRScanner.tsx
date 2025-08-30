@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -10,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
-import { Camera, TriangleAlert } from 'lucide-react';
+import { Camera, TriangleAlert, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface ScannedItem {
@@ -55,21 +56,16 @@ export default function QRScanner() {
   };
 
   const startScanner = async () => {
-    if (isScannerActive || !videoRef.current) return;
+    if (isScannerActive || !videoRef.current || !scannerRef.current) return;
     try {
-      await Html5Qrcode.getCameras();
-      setHasCameraPermission(true);
-      
-      const qrScanner = new Html5Qrcode(videoRef.current.id);
-      scannerRef.current = qrScanner;
-
-      await qrScanner.start(
+      await scannerRef.current.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: { width: 250, height: 250 } },
         onScanSuccess,
         onScanFailure
       );
       setIsScannerActive(true);
+      setScanError(null);
     } catch (error) {
       console.error('Error starting scanner:', error);
       setHasCameraPermission(false);
@@ -78,7 +74,7 @@ export default function QRScanner() {
   };
 
   const stopScanner = () => {
-    if (scannerRef.current && isScannerActive) {
+    if (scannerRef.current && scannerRef.current.isScanning) {
       scannerRef.current.stop().then(() => {
         setIsScannerActive(false);
       }).catch(err => {
@@ -88,38 +84,55 @@ export default function QRScanner() {
   };
   
   useEffect(() => {
-    const requestPermission = async () => {
-       try {
+    const initializeScanner = async () => {
+      try {
         await Html5Qrcode.getCameras();
         setHasCameraPermission(true);
+        
+        if (videoRef.current) {
+            const qrScanner = new Html5Qrcode(videoRef.current.id, {
+                verbose: false,
+            });
+            scannerRef.current = qrScanner;
+            if (!scannedItem) {
+              startScanner();
+            }
+        }
       } catch (err) {
+        console.error('Failed to get cameras', err);
         setHasCameraPermission(false);
+        setScanError('Camera not found or permission denied. Please grant camera permissions.');
       }
     };
-    requestPermission();
+    initializeScanner();
     
-    // Cleanup on component unmount
     return () => {
         if(scannerRef.current && scannerRef.current.isScanning) {
             stopScanner();
         }
     };
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scannedItem]);
 
   const resetScanner = () => {
     setScannedItem(null);
     setScanError(null);
-    startScanner();
+    // The useEffect will handle restarting the scanner
   };
   
   return (
     <div className="space-y-4">
         <div className="w-full aspect-square bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
             <div id="video-container" ref={videoRef} className="w-full h-full" />
-
-            {!isScannerActive && (
+            
+            {!isScannerActive && !scannedItem && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white p-4 text-center">
-                    {hasCameraPermission === null && <p>Checking camera permissions...</p>}
+                    {hasCameraPermission === null && (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Checking for camera...</span>
+                      </div>
+                    )}
                     {hasCameraPermission === false && (
                          <Alert variant="destructive" className="bg-destructive/80 border-0 text-white max-w-sm">
                             <TriangleAlert className="h-4 w-4 text-white" />
@@ -129,17 +142,11 @@ export default function QRScanner() {
                             </AlertDescription>
                         </Alert>
                     )}
-                    {hasCameraPermission && !scannedItem && (
-                       <div className="flex flex-col items-center gap-4">
-                         <Camera className="h-12 w-12" />
-                         <h3 className="text-xl font-semibold">Ready to Scan</h3>
-                         <p className="text-sm text-muted-foreground text-white/80">
-                            Press the button below to start the camera.
-                         </p>
-                        <Button onClick={startScanner} size="lg">
-                            Start Scanning
-                        </Button>
-                       </div>
+                     {hasCameraPermission === true && (
+                      <div className="flex items-center gap-2">
+                         <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Starting camera...</span>
+                      </div>
                     )}
                 </div>
             )}
