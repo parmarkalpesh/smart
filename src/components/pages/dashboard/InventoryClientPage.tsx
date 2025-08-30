@@ -9,9 +9,11 @@ import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import DashboardStats from './DashboardStats';
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function InventoryClientPage() {
   const { items, deleteItem } = useInventory();
+  const { user } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function InventoryClientPage() {
           </Button>
         </Link>
       </div>
-      <DataTable columns={columns({ deleteItem, userRole: 'admin' })} data={items} />
+      <DataTable columns={columns({ deleteItem, userRole: user?.role ?? null })} data={items} />
     </div>
   );
 }

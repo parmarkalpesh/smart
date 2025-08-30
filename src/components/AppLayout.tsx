@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
-import { usePathname } from 'next/navigation';
+import React, { useMemo, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   SidebarProvider,
@@ -25,12 +25,26 @@ import {
   QrCode,
   Power,
   Bell,
+  Shield,
+  User
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { useInventory } from '@/hooks/useInventory';
+import { useAuth } from '@/hooks/useAuth';
+import { Skeleton } from './ui/skeleton';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [user, loading, router]);
+
+
   const isActive = (path: string) => pathname === path;
   const { items } = useInventory();
 
@@ -57,6 +71,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return lowStockItems.length + expiringSoonItems.length + maintenanceDueItems.length;
   }, [items]);
 
+  const handleLogout = () => {
+    logout();
+  }
+
+  if (loading || !user) {
+    return (
+       <div className="flex h-screen w-full items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <QrCode className="h-10 w-10 animate-pulse text-primary" />
+                <p className="text-muted-foreground">Loading Your Workspace...</p>
+            </div>
+        </div>
+    );
+  }
+
 
   return (
     <SidebarProvider>
@@ -76,10 +105,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
-                isActive={isActive('/')}
+                isActive={isActive('/dashboard')}
                 tooltip="Dashboard"
               >
-                <Link href="/">
+                <Link href="/dashboard">
                   <LayoutDashboard />
                   <span>Dashboard</span>
                 </Link>
@@ -126,7 +155,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter>
           <Separator className="my-2 bg-sidebar-border" />
-          <Button variant="ghost" className="w-full justify-start gap-2" disabled>
+          <div className="flex items-center p-2 text-sm text-sidebar-foreground/70">
+            {user.role === 'admin' ? <Shield className="mr-2" /> : <User className="mr-2" />}
+            <span className="font-medium capitalize">{user.role}</span>
+          </div>
+          <Button variant="ghost" className="w-full justify-start gap-2" onClick={handleLogout}>
             <Power />
             <span>Logout</span>
           </Button>
