@@ -50,9 +50,9 @@ const itemUpdateTool = ai.defineTool(
         outputSchema: z.any(), // The output of the tool itself doesn't matter for this use case.
     },
     async (input) => {
-        // This function is just a placeholder for the schema definition.
-        // The actual inventory update happens on the client-side using the data
-        // that the AI provides as the 'input' to this tool.
+        // This function is just a placeholder. The AI uses the *schema* of this tool
+        // to structure its response. The actual inventory update happens on the
+        // client-side using the data that the AI provides as the 'input' to this tool.
         return { success: true };
     }
 )
