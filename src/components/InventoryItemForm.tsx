@@ -62,14 +62,15 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
   const [isImageValid, setIsImageValid] = useState(true);
 
   function onSubmit(values: InventoryFormValues) {
-    if (isEditMode) {
+    if (isEditMode && item) {
       updateItem(item.id, values);
       toast({ title: 'Item Updated', description: `"${values.name}" has been successfully updated.` });
+      router.push(`/item/${item.id}`);
     } else {
-      addItem(values);
+      const newItem = addItem(values);
       toast({ title: 'Item Added', description: `"${values.name}" has been added to inventory.` });
+      router.push(`/item/${newItem.id}`);
     }
-    router.push('/dashboard');
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

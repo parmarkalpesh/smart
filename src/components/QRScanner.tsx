@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { Html5Qrcode, Html5QrcodeScanner, QrCodeSuccessCallback } from 'html5-qrcode';
+import { Html5Qrcode } from 'html5-qrcode';
+import type { QrCodeSuccessCallback } from 'html5-qrcode';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from './ui/button';
@@ -9,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
-import { Camera, CameraOff, TriangleAlert } from 'lucide-react';
+import { Camera, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 
 interface ScannedItem {
@@ -117,10 +118,10 @@ export default function QRScanner() {
             <div id="video-container" ref={videoRef} className="w-full h-full" />
 
             {!isScannerActive && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white p-4">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white p-4 text-center">
                     {hasCameraPermission === null && <p>Checking camera permissions...</p>}
                     {hasCameraPermission === false && (
-                         <Alert variant="destructive" className="bg-destructive/80 border-0 text-white">
+                         <Alert variant="destructive" className="bg-destructive/80 border-0 text-white max-w-sm">
                             <TriangleAlert className="h-4 w-4 text-white" />
                             <AlertTitle>Camera Access Denied</AlertTitle>
                             <AlertDescription>
@@ -129,10 +130,16 @@ export default function QRScanner() {
                         </Alert>
                     )}
                     {hasCameraPermission && !scannedItem && (
+                       <div className="flex flex-col items-center gap-4">
+                         <Camera className="h-12 w-12" />
+                         <h3 className="text-xl font-semibold">Ready to Scan</h3>
+                         <p className="text-sm text-muted-foreground text-white/80">
+                            Press the button below to start the camera.
+                         </p>
                         <Button onClick={startScanner} size="lg">
-                            <Camera className="mr-2 h-5 w-5" />
                             Start Scanning
                         </Button>
+                       </div>
                     )}
                 </div>
             )}

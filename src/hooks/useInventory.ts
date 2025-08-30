@@ -21,6 +21,7 @@ export function useInventory() {
       dateAdded: new Date().toISOString(),
     };
     setItems([...items, newItem]);
+    return newItem;
   };
 
   const updateItem = (id: string, updatedItem: Partial<InventoryItem>) => {
