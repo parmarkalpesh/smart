@@ -4,12 +4,18 @@ import { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InventoryItem } from '@/lib/types';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 
 
 interface MostStockedChartProps {
   items: InventoryItem[];
 }
+
+const chartConfig = {
+  quantity: {
+    label: 'Quantity',
+  },
+};
 
 export default function MostStockedChart({ items }: MostStockedChartProps) {
   const chartData = useMemo(() => {
@@ -43,18 +49,20 @@ export default function MostStockedChart({ items }: MostStockedChartProps) {
         <CardDescription>Your most abundant items in the inventory.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-30} textAnchor="end" height={80} />
-            <YAxis allowDecimals={false} />
-            <Tooltip 
-                content={<ChartTooltipContent />}
-                cursor={{ fill: 'hsl(var(--muted))' }}
-            />
-            <Bar dataKey="quantity" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+            <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} angle={-30} textAnchor="end" height={80} />
+                <YAxis allowDecimals={false} />
+                <Tooltip 
+                    content={<ChartTooltipContent />}
+                    cursor={{ fill: 'hsl(var(--muted))' }}
+                />
+                <Bar dataKey="quantity" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+            </BarChart>
+            </ResponsiveContainer>
+        </ChartContainer>
       </CardContent>
     </Card>
   );
