@@ -28,7 +28,7 @@ export type UpdateItemWithVoiceInput = z.infer<typeof UpdateItemWithVoiceInputSc
 const UpdateItemWithVoiceOutputSchema = z.object({
     name: z.string().optional(),
     type: z.string().optional(),
-    quantity: z.number().optional(),
+    quantity: z.coerce.number().optional(),
     status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted']).optional(),
     location: z.string().optional(),
     supplier: z.string().optional(),
@@ -57,6 +57,27 @@ const itemUpdateTool = ai.defineTool(
     }
 )
 
+const updatePrompt = ai.definePrompt(
+    {
+        name: 'updateItemWithVoicePrompt',
+        tools: [itemUpdateTool],
+        input: { schema: UpdateItemWithVoiceInputSchema },
+        prompt: `You are a voice assistant for an inventory management system.
+A user has provided a voice command to update an inventory item.
+Transcribe the audio and determine which fields to update.
+Use the 'updateInventoryItem' tool to specify the new values.
+If the user's command is unclear or does not seem to relate to updating an inventory item,
+call the tool with an empty object.
+
+Audio command: {{media url=audioDataUri}}`,
+        config: {
+            // Lower temperature for more deterministic, structured output
+            temperature: 0.1,
+        }
+    }
+);
+
+
 // The main Genkit flow.
 const updateItemWithVoiceFlow = ai.defineFlow(
   {
@@ -65,35 +86,17 @@ const updateItemWithVoiceFlow = ai.defineFlow(
     outputSchema: UpdateItemWithVoiceOutputSchema,
   },
   async (input) => {
-    // The prompt that instructs the model on how to behave.
-    const prompt = `You are a voice assistant for an inventory management system.
-    A user has provided a voice command to update an inventory item.
-    Transcribe the audio and determine which fields to update.
-    Use the 'updateInventoryItem' tool to specify the new values.
-    If the user's command is unclear or does not seem to relate to updating an inventory item,
-    call the tool with an empty object.
-
-    Audio command: {{media url=audioDataUri}}`;
-
-    const llmResponse = await ai.generate({
-      prompt: prompt,
-      model: 'googleai/gemini-2.5-flash',
-      tools: [itemUpdateTool],
-      toolChoice: 'required', // Force the model to use the tool.
-      input: {
-        audioDataUri: input.audioDataUri,
-      },
-      config: {
-        // Lower temperature for more deterministic, structured output
-        temperature: 0.1, 
-      }
+    
+    const llmResponse = await updatePrompt(input, {
+        toolChoice: 'required', // Force the model to use the tool.
     });
 
     const toolRequest = llmResponse.toolRequest();
     
     if (toolRequest?.name === 'updateInventoryItem' && toolRequest.input) {
         // The validated and structured data from the tool call is our output.
-        return toolRequest.input;
+        // Zod parse will ensure the types are correct (e.g. quantity is a number)
+        return UpdateItemWithVoiceOutputSchema.parse(toolRequest.input);
     }
 
     // If the tool wasn't called correctly or the input was empty, return an empty object.
