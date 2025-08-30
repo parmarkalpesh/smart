@@ -45,11 +45,10 @@ const getInventoryData = ai.defineTool(
     outputSchema: z.any(), // We'll let the AI handle the raw JSON.
   },
   async (input) => {
-    // Note: The `input` here is provided by the AI model's tool call.
-    // This function body is where you would typically fetch from a database.
-    // For this implementation, the full data is passed in the main flow's input,
-    // and this tool's logic is handled inside the prompt's context.
-    // This function body itself is not executed in this specific setup, but is required by Genkit.
+    // This function body is not executed in this specific setup because the data
+    // is passed directly into the tool's context in the flow.
+    // However, the function body is required by Genkit.
+    // In a real-world scenario, this is where you would fetch from a database.
     return { success: true }; 
   }
 );
@@ -101,6 +100,7 @@ const investigateInventoryFlow = ai.defineFlow(
   async (input) => {
     const { query, inventoryData, history } = input;
     
+    // Ensure history is correctly formatted as per Genkit's Message type.
     const fullHistory: Message[] = (history || []).map(msg => ({
       role: msg.role as 'user' | 'model',
       content: msg.content,
@@ -109,13 +109,7 @@ const investigateInventoryFlow = ai.defineFlow(
     // Generate the AI's response.
     const llmResponse = await investigatorPrompt({
         history: fullHistory,
-        messages: [
-            {
-                role: 'user',
-                content: query
-            }
-        ],
-        tools: [getInventoryData],
+        messages: [{ role: 'user', content: query }],
         toolContext: {
           // Provide the full inventory data to the tool's context
           getInventoryData: JSON.parse(inventoryData)
