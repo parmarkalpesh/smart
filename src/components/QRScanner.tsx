@@ -26,7 +26,7 @@ export default function QRScanner() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [isScannerActive, setIsScannerActive] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
-  const videoRef = useRef<HTMLDivElement>(null);
+  const videoContainerId = "video-container";
 
   const onScanSuccess: QrCodeSuccessCallback = (decodedText, decodedResult) => {
     stopScanner();
@@ -35,9 +35,10 @@ export default function QRScanner() {
       if (item) {
         toast({
           title: 'Scan Successful!',
-          description: `Item "${item.name}" found. Redirecting...`,
+          description: `Item "${item.name}" found.`,
         });
-        router.push(`/item/${item.id}`);
+        setScannedItem(item);
+        setScanError(null);
       } else {
          setScannedItem(null);
         setScanError('Item not found in inventory. Please scan a valid item QR code.');
@@ -54,11 +55,20 @@ export default function QRScanner() {
   };
 
   const startScanner = async () => {
-    if (isScannerActive || !videoRef.current || !scannerRef.current) return;
+    if (isScannerActive || !scannerRef.current) return;
     try {
+        const qrboxFunction = (viewfinderWidth: number, viewfinderHeight: number) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+            const qrboxSize = Math.floor(minEdge * 0.8);
+            return {
+                width: qrboxSize,
+                height: qrboxSize,
+            };
+        };
+
       await scannerRef.current.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        { fps: 10, qrbox: qrboxFunction },
         onScanSuccess,
         onScanFailure
       );
@@ -83,25 +93,29 @@ export default function QRScanner() {
   
   useEffect(() => {
     const initializeScanner = async () => {
-      try {
-        await Html5Qrcode.getCameras();
-        setHasCameraPermission(true);
-        
-        if (videoRef.current) {
-            const qrScanner = new Html5Qrcode(videoRef.current.id, {
-                verbose: false,
-            });
-            scannerRef.current = qrScanner;
-            if (!scannedItem) {
+        if (scannedItem || isScannerActive) return;
+
+        try {
+            await Html5Qrcode.getCameras();
+            setHasCameraPermission(true);
+            
+            if (!scannerRef.current) {
+                 scannerRef.current = new Html5Qrcode(videoContainerId, {
+                    verbose: false,
+                });
+            }
+           
+            if (!isScannerActive) {
               startScanner();
             }
+
+        } catch (err) {
+            console.error('Failed to get cameras', err);
+            setHasCameraPermission(false);
+            setScanError('Camera not found or permission denied. Please grant camera permissions.');
         }
-      } catch (err) {
-        console.error('Failed to get cameras', err);
-        setHasCameraPermission(false);
-        setScanError('Camera not found or permission denied. Please grant camera permissions.');
-      }
     };
+
     initializeScanner();
     
     return () => {
@@ -118,10 +132,47 @@ export default function QRScanner() {
     // The useEffect will handle restarting the scanner
   };
   
+  if (scannedItem) {
+    return (
+        <Card className="w-full max-w-md mx-auto">
+            <CardHeader>
+                <CardTitle>Item Found</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {scannedItem.imageUrl ? (
+                     <div className="relative w-full aspect-video">
+                        <Image src={scannedItem.imageUrl} alt={scannedItem.name} fill className="rounded-md object-cover" />
+                    </div>
+                ) : (
+                    <div className="aspect-video flex items-center justify-center bg-muted rounded-md">
+                        <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                    </div>
+                )}
+                <Separator />
+                <div className="space-y-2">
+                    <h3 className="text-xl font-semibold">{scannedItem.name}</h3>
+                    <p className="text-muted-foreground">{scannedItem.type}</p>
+                    <div className="flex items-center justify-between pt-2">
+                        <Badge>{scannedItem.status}</Badge>
+                        <p>Quantity: <span className="font-bold">{scannedItem.quantity}</span></p>
+                    </div>
+                </div>
+                 <Separator />
+                 <div className="flex gap-2">
+                    <Button onClick={resetScanner} variant="outline" className="w-full">Scan Another Item</Button>
+                    <Button asChild className="w-full">
+                        <Link href={`/item/${scannedItem.id}`}>View Full Details</Link>
+                    </Button>
+                 </div>
+            </CardContent>
+        </Card>
+    );
+  }
+
   return (
     <div className="space-y-4">
         <div className="w-full aspect-square bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
-            <div id="video-container" ref={videoRef} className="w-full h-full" />
+            <div id={videoContainerId} className="w-full h-full" />
             
             {!isScannerActive && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white p-4 text-center">
@@ -140,7 +191,7 @@ export default function QRScanner() {
                             </AlertDescription>
                         </Alert>
                     )}
-                     {hasCameraPermission === true && (
+                     {hasCameraPermission === true && !scanError && (
                       <div className="flex items-center gap-2">
                          <Loader2 className="h-5 w-5 animate-spin" />
                         <span>Starting camera...</span>
