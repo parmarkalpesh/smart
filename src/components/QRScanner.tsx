@@ -29,7 +29,9 @@ export default function QRScanner() {
   const videoContainerId = "video-container";
 
   const onScanSuccess: QrCodeSuccessCallback = (decodedText, decodedResult) => {
-    stopScanner();
+    if (scannerRef.current?.isScanning) {
+        stopScanner();
+    }
     try {
       const item = getItemById(decodedText);
       if (item) {
@@ -53,9 +55,8 @@ export default function QRScanner() {
     // This is called frequently, so we don't want to spam the UI.
     // console.warn(`Code scan error = ${error}`);
   };
-
-  const startScanner = async () => {
-    if (isScannerActive || !scannerRef.current) return;
+  
+  const startScanner = async (scanner: Html5Qrcode) => {
     try {
         const qrboxFunction = (viewfinderWidth: number, viewfinderHeight: number) => {
             const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
@@ -66,7 +67,7 @@ export default function QRScanner() {
             };
         };
 
-      await scannerRef.current.start(
+      await scanner.start(
         { facingMode: 'environment' },
         { fps: 10, qrbox: qrboxFunction },
         onScanSuccess,
@@ -93,22 +94,14 @@ export default function QRScanner() {
   
   useEffect(() => {
     const initializeScanner = async () => {
-        if (scannedItem || isScannerActive) return;
-
         try {
             await Html5Qrcode.getCameras();
             setHasCameraPermission(true);
-            
-            if (!scannerRef.current) {
-                 scannerRef.current = new Html5Qrcode(videoContainerId, {
-                    verbose: false,
-                });
+            const scanner = new Html5Qrcode(videoContainerId, { verbose: false });
+            scannerRef.current = scanner;
+            if (!scannedItem) {
+                startScanner(scanner);
             }
-           
-            if (!isScannerActive) {
-              startScanner();
-            }
-
         } catch (err) {
             console.error('Failed to get cameras', err);
             setHasCameraPermission(false);
@@ -116,7 +109,9 @@ export default function QRScanner() {
         }
     };
 
-    initializeScanner();
+    if (hasCameraPermission === null) {
+        initializeScanner();
+    }
     
     return () => {
         if(scannerRef.current && scannerRef.current.isScanning) {
@@ -124,12 +119,15 @@ export default function QRScanner() {
         }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scannedItem]);
+  }, [hasCameraPermission, scannedItem]);
+
 
   const resetScanner = () => {
     setScannedItem(null);
     setScanError(null);
-    // The useEffect will handle restarting the scanner
+    if(scannerRef.current && !scannerRef.current.isScanning) {
+        startScanner(scannerRef.current);
+    }
   };
   
   if (scannedItem) {
