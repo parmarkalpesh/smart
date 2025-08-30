@@ -8,12 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import QRCodeComponent from '@/components/QRCodeComponent';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
-import { InventoryItem, VoiceNote } from '@/lib/types';
+import { InventoryItem } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
 import {ImageIcon, Fingerprint, MapPin, Building, Calendar, Bot} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import VoiceCommandProcessor from './VoiceCommandProcessor';
+import VoiceCommandInput from './VoiceCommandInput';
 
 export default function ItemClientPage({ itemId }: { itemId: string }) {
   const { getItemById, updateItem } = useInventory();
@@ -25,22 +25,22 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
     setItem(foundItem);
   }, [itemId, getItemById]);
 
-  const handleVoiceUpdate = (updates: Partial<InventoryItem>, transcription: string) => {
+  const handleTextUpdate = (updates: Partial<InventoryItem>, command: string) => {
     if (!item) return;
     const updatedItemData = { ...item, ...updates };
     updateItem(item.id, updates);
     setItem(updatedItemData);
      toast({
-        title: 'Item Updated by Voice',
-        description: `Command: "${transcription}"`,
+        title: 'Item Updated by Voice Command',
+        description: `Command: "${command}"`,
     });
   }
 
-  const handleVoiceError = (transcription: string | null, error: string) => {
+  const handleUpdateError = (command: string | null, error: string) => {
     toast({
       variant: 'destructive',
       title: error,
-      description: transcription ? `Heard: "${transcription}"` : "Could not understand audio. Please try again.",
+      description: command ? `Could not process command: "${command}"` : "An unexpected error occurred.",
     })
   }
 
@@ -69,10 +69,10 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Bot /> Voice Command</CardTitle>
-                    <CardDescription>Use your voice to dictate an update command, like "Change status to wasted" or "Update quantity to 25".</CardDescription>
+                    <CardDescription>Use your voice to dictate an update. The transcribed text will appear below. Review and click "Apply Update" to save.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <VoiceCommandProcessor itemId={item.id} onUpdate={handleVoiceUpdate} onError={handleVoiceError} />
+                    <VoiceCommandInput itemId={item.id} onUpdate={handleTextUpdate} onError={handleUpdateError} />
                 </CardContent>
             </Card>
         </div>
@@ -163,7 +163,7 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
 function ItemSkeleton() {
     return (
         <div className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-4">
+            <div className="md:col-span-2 space-y-6">
                 <Card>
                     <CardHeader>
                         <Skeleton className="h-8 w-1/2" />
@@ -175,6 +175,19 @@ function ItemSkeleton() {
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="flex justify-end"><Skeleton className="h-10 w-24" /></div>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <Skeleton className="h-8 w-1/2" />
+                        <Skeleton className="h-4 w-3/4" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-20 w-full" />
+                        <div className="flex gap-2">
+                             <Skeleton className="h-10 w-28" />
+                             <Skeleton className="h-10 w-28" />
+                        </div>
                     </CardContent>
                 </Card>
             </div>
