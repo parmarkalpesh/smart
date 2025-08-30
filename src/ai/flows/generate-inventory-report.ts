@@ -1,3 +1,4 @@
+
 // src/ai/flows/generate-inventory-report.ts
 'use server';
 /**
@@ -17,7 +18,7 @@ const GenerateInventoryReportInputSchema = z.object({
 export type GenerateInventoryReportInput = z.infer<typeof GenerateInventoryReportInputSchema>;
 
 const GenerateInventoryReportOutputSchema = z.object({
-  report: z.string().describe('A detailed report summarizing the inventory status, including seasonal trends and restocking recommendations.'),
+  report: z.string().describe('A detailed report summarizing the inventory status, including seasonal trends and restocking recommendations, with a markdown table for trending products.'),
 });
 export type GenerateInventoryReportOutput = z.infer<typeof GenerateInventoryReportOutputSchema>;
 
@@ -31,16 +32,23 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateInventoryReportOutputSchema},
   prompt: `You are an AI assistant specialized in inventory management and seasonal trend analysis.
 
-You are provided with current inventory data. Analyze this data to generate a comprehensive report that includes:
+You are provided with current inventory data. Analyze this data to generate a comprehensive report.
 
-- Overall inventory status summary.
-- Identification of seasonal trends based on historical data and current stock levels.
-- Recommendations for restocking items based on current stock and predicted demand.
-- Suggestions for promotions to clear out excess stock.
+The report should include:
+- A brief overall inventory status summary.
+- A section for "Future Trending Products".
+
+For the "Future Trending Products" section, create a markdown table with the following columns:
+- "Product Name": The name of the item.
+- "Current Quantity": The current stock level.
+- "Predicted Trend": A brief explanation of why the product is expected to trend (e.g., "High demand in Summer", "Upcoming holiday season").
+- "Recommendation": Actionable advice (e.g., "Restock immediately", "Monitor stock", "Plan promotion").
+
+Analyze the items based on their type, name, and the current date to predict future and seasonal trends.
 
 Inventory Data: {{{inventoryData}}}
 
-Generate the report in a clear and concise manner.
+Generate the full report in a clear and well-formatted markdown.
 `,
 });
 
