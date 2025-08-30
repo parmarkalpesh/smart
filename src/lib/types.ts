@@ -7,4 +7,5 @@ export interface InventoryItem {
   dateAdded: string; // ISO string
   status: ItemStatus;
   quantity: number;
+  imageUrl?: string;
 }

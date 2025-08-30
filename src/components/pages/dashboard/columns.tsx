@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, ArrowUpDown, Eye, Trash2, Edit } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Trash2, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -26,6 +26,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 type ColumnsProps = {
   deleteItem: (id: string) => void;
@@ -49,6 +50,20 @@ const getStatusBadgeVariant = (status: ItemStatus) => {
 
 
 export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<InventoryItem>[] => [
+  {
+    accessorKey: 'imageUrl',
+    header: '',
+    cell: ({row}) => {
+      const imageUrl = row.getValue('imageUrl') as string | undefined;
+      const name = row.getValue('name') as string;
+      return imageUrl ? (
+        <div className="w-10 h-10 relative flex-shrink-0">
+          <Image src={imageUrl} alt={name} fill className="rounded-md object-cover" />
+        </div>
+      ) : null
+    },
+    enableSorting: false,
+  },
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -115,7 +130,7 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href={`/item/${item.id}`}>
-                  <Eye className="mr-2 h-4 w-4" />
+                  <Edit className="mr-2 h-4 w-4" />
                   View/Edit Item
                 </Link>
               </DropdownMenuItem>

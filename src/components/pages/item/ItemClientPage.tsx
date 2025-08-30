@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
 import { InventoryItem } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
+import Image from 'next/image';
+import {ImageIcon} from 'lucide-react';
 
 export default function ItemClientPage({ itemId }: { itemId: string }) {
   const { getItemById } = useInventory();
@@ -42,6 +44,29 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
             </Card>
         </div>
         <div className="space-y-6">
+             {item.imageUrl ? (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Item Image</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="aspect-video relative">
+                            <Image src={item.imageUrl} alt={item.name} fill className="rounded-md object-cover" />
+                        </div>
+                    </CardContent>
+                </Card>
+            ) : (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Item Image</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="aspect-video flex items-center justify-center bg-muted rounded-md">
+                            <ImageIcon className="h-12 w-12 text-muted-foreground" />
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
             <Card>
                 <CardHeader>
                     <CardTitle>Item QR Code</CardTitle>
@@ -54,7 +79,7 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
             <Card>
                 <CardHeader>
                     <CardTitle>Item Details</CardTitle>
-                </CardHeader>
+                </Header>
                 <CardContent className="space-y-3 text-sm">
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">ID</span>
@@ -91,6 +116,14 @@ function ItemSkeleton() {
                 </Card>
             </div>
              <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <Skeleton className="h-8 w-3/4" />
+                    </CardHeader>
+                     <CardContent>
+                        <Skeleton className="w-full aspect-video" />
+                    </CardContent>
+                </Card>
                 <Card>
                     <CardHeader>
                          <Skeleton className="h-8 w-3/4" />

@@ -24,12 +24,15 @@ import { useInventory } from '@/hooks/useInventory';
 import { useRouter } from 'next/navigation';
 import { InventoryItem, ItemStatus } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import Image from 'next/image';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   type: z.string().min(2, { message: 'Type must be at least 2 characters.' }),
   quantity: z.coerce.number().min(0, { message: 'Quantity cannot be negative.' }),
   status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock']),
+  imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional(),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
@@ -51,8 +54,11 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
       type: item?.type || '',
       quantity: item?.quantity || 0,
       status: item?.status || 'Available',
+      imageUrl: item?.imageUrl || '',
     },
   });
+
+  const [imagePreview, setImagePreview] = useState<string | undefined>(item?.imageUrl);
 
   function onSubmit(values: InventoryFormValues) {
     if (isEditMode) {
@@ -64,6 +70,16 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
     }
     router.push('/dashboard');
   }
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    form.setValue('imageUrl', value);
+    if (form.getFieldState('imageUrl').invalid) {
+      setImagePreview(undefined);
+    } else {
+      setImagePreview(value);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -133,6 +149,31 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
             </FormItem>
           )}
         />
+         <FormField
+          control={form.control}
+          name="imageUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image URL</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="https://example.com/image.png"
+                  {...field}
+                  onChange={handleImageChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {imagePreview && (
+          <div>
+             <FormLabel>Image Preview</FormLabel>
+            <div className="mt-2 relative aspect-video w-full max-w-sm">
+                <Image src={imagePreview} alt="Item Preview" fill className="rounded-md object-cover" />
+            </div>
+          </div>
+        )}
         <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
             <Button type="submit">{isEditMode ? 'Save Changes' : 'Add Item'}</Button>
