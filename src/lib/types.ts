@@ -1,4 +1,5 @@
 
+
 export type ItemStatus = 'Available' | 'Checked Out' | 'In Maintenance' | 'Low Stock' | 'Wasted';
 
 export interface VoiceNote {
@@ -30,4 +31,15 @@ export interface GoogleUser {
     name: string;
     email: string;
     picture: string;
+}
+
+export type History = {
+  role: 'user' | 'model';
+  content: string;
+}[];
+
+export interface InvestigateInventoryInput {
+  query: string;
+  inventoryData: string;
+  history?: History;
 }

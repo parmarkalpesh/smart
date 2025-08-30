@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { marked } from 'marked';
+import type { History } from '@/lib/types';
 
 type Message = {
   role: 'user' | 'model';
@@ -49,10 +50,15 @@ export default function InvestigatorClientPage() {
 
     startTransition(async () => {
       try {
+        const history: History = messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+        }));
+
         const result = await investigateInventory({
           query: input,
           inventoryData: JSON.stringify(items),
-          history: messages,
+          history: history,
         });
         
         const modelMessage: Message = { role: 'model', content: result };

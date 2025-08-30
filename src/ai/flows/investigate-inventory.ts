@@ -9,8 +9,10 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { Message } from 'genkit/experimental/ai';
+import type { InvestigateInventoryInput, History } from '@/lib/types';
+
 
 // Define the input schema for the getInventoryData tool.
 // This allows the AI to filter data by name or type.
@@ -28,12 +30,11 @@ const HistorySchema = z.array(z.object({
 }));
 
 // Define the input for the main investigation flow.
-export const InvestigateInventoryInputSchema = z.object({
+const InvestigateInventoryInputSchema = z.object({
   query: z.string().describe('The user\'s question or command.'),
   inventoryData: z.string().describe('The full inventory data as a JSON string. This will be used by the tool.'),
   history: HistorySchema.optional().describe('The conversation history.'),
 });
-export type InvestigateInventoryInput = z.infer<typeof InvestigateInventoryInputSchema>;
 
 
 /**
@@ -81,7 +82,7 @@ You are friendly, helpful, and concise.
 You have access to a tool called 'getInventoryData' that can retrieve inventory items.
 Use this tool whenever the user asks a question that requires information about the inventory.
 
-IMPORTANT: The user has provided the full inventory data. When you use the 'getInventoryData' tool, you do not need to call an external API. Instead, you should filter the provided 'inventoryData' based on the parameters of the tool call. After filtering, use the resulting data to answer the user's question.
+IMPORTANT: The user has provided the full inventory data. When you use the 'getInventoryData' tool, you do not need to call an external API. Instead, you should filter the provided 'inventoryData' JSON based on the parameters of the tool call. After filtering, use the resulting data to answer the user's question.
 
 For example, if the user asks "how many laptops do I have?", you should:
 1. Decide to call the 'getInventoryData' tool with a filter like { name: 'laptop' }.
@@ -110,7 +111,7 @@ const investigateInventoryFlow = ai.defineFlow(
     // Construct the full prompt, including history and the latest query.
     const fullPrompt: Message[] = [
       ...(history || []).map(msg => ({
-          role: msg.role,
+          role: msg.role as 'user' | 'model',
           content: [{ text: msg.content }],
       })),
       {
