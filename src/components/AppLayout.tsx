@@ -27,7 +27,8 @@ import {
   Bell,
   Shield,
   User,
-  ShoppingCart
+  ShoppingCart,
+  AreaChart
 } from 'lucide-react';
 import { Separator } from './ui/separator';
 import { useInventory } from '@/hooks/useInventory';
@@ -151,6 +152,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <Link href="/purchasing">
                       <ShoppingCart />
                       <span>Purchasing</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive('/analytics')}
+                    tooltip="Analytics"
+                  >
+                    <Link href="/analytics">
+                      <AreaChart />
+                      <span>Analytics</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
