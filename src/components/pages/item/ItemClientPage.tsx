@@ -150,7 +150,7 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
             <Card>
                 <CardHeader>
                     <CardTitle>Item Details</CardTitle>
-                </Header>
+                </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                     <div className="flex items-start justify-between">
                         <div className='flex items-center gap-2'>
@@ -219,7 +219,7 @@ function ItemSkeleton() {
              <div className="space-y-6">
                 <Card>
                     <CardHeader>
-                        <Skeleton className="h-8 w-3/4" />
+                         <Skeleton className="h-8 w-3/4" />
                     </CardHeader>
                      <CardContent>
                         <Skeleton className="w-full aspect-video" />
