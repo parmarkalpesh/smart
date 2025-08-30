@@ -44,6 +44,8 @@ const getStatusBadgeVariant = (status: ItemStatus) => {
       return 'destructive';
     case 'Low Stock':
       return 'outline';
+    case 'Wasted':
+      return 'destructive'
     default:
       return 'secondary';
   }

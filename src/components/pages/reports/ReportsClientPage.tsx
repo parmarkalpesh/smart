@@ -6,11 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/hooks/useInventory';
 import { generateInventoryReport } from '@/ai/flows/generate-inventory-report';
-import { Wand2, FileText, TriangleAlert } from 'lucide-react';
+import { generateWastageReport } from '@/ai/flows/generate-wastage-report';
+import { Wand2, FileText, TriangleAlert, Trash2, TrendingUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import InventoryChart from './InventoryChart';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+type ReportType = 'trends' | 'wastage';
 
 export default function ReportsClientPage() {
   const { items } = useInventory();
@@ -18,58 +22,105 @@ export default function ReportsClientPage() {
   const [isPending, startTransition] = useTransition();
   const [report, setReport] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [currentReportType, setCurrentReportType] = useState<ReportType | null>(null);
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = (reportType: ReportType) => {
     setError(null);
     setReport(null);
+    setCurrentReportType(reportType);
+
     startTransition(async () => {
       try {
-        const result = await generateInventoryReport({
-          inventoryData: JSON.stringify(items),
-        });
+        let result;
+        if (reportType === 'trends') {
+          result = await generateInventoryReport({
+            inventoryData: JSON.stringify(items),
+          });
+        } else {
+          const wastedItems = items.filter(item => item.status === 'Wasted');
+          if (wastedItems.length === 0) {
+            setReport("No wasted items found in the inventory to analyze.");
+            return;
+          }
+          result = await generateWastageReport({
+            inventoryData: JSON.stringify(wastedItems),
+          });
+        }
         setReport(result.report);
       } catch (e) {
         console.error(e);
-        setError('Failed to generate report. Please try again later.');
+        const errorMessage = `Failed to generate ${reportType} report. Please try again later.`;
+        setError(errorMessage);
         toast({
           variant: 'destructive',
           title: 'Error',
-          description: 'Could not generate the inventory report.',
+          description: errorMessage,
         });
       }
     });
   };
 
   const handleDownloadReport = () => {
-    if (!report) return;
+    if (!report || !currentReportType) return;
     const blob = new Blob([report], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'inventory-report.md';
+    link.download = `${currentReportType}-report.md`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
+  const getReportTitle = (reportType: ReportType | null) => {
+    if (reportType === 'trends') return 'Future Trends Report';
+    if (reportType === 'wastage') return 'Wastage Analysis Report';
+    return 'Inventory Analysis Report';
+  }
+
   return (
     <div className="space-y-6">
-       <InventoryChart items={items} />
+      <InventoryChart items={items.filter(i => i.status !== 'Wasted')} />
 
       <Card>
         <CardHeader>
           <CardTitle>Automated Reporting Tool</CardTitle>
           <CardDescription>
-            Use our AI-powered tool to analyze your current inventory. Get insights
-            on stock status, seasonal trends, and restocking recommendations.
+            Use our AI-powered tool to analyze your inventory for future trends or past wastage.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={handleGenerateReport} disabled={isPending}>
-            <Wand2 className="mr-2 h-4 w-4" />
-            {isPending ? 'Generating Report...' : 'Generate Inventory Report'}
-          </Button>
+          <Tabs defaultValue="trends">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="trends">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Future Trends
+              </TabsTrigger>
+              <TabsTrigger value="wastage">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Wastage Analysis
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="trends" className="pt-4">
+               <CardDescription className="mb-4">
+                Analyze your current inventory to get insights on stock status, seasonal trends, and restocking recommendations.
+              </CardDescription>
+              <Button onClick={() => handleGenerateReport('trends')} disabled={isPending}>
+                <Wand2 className="mr-2 h-4 w-4" />
+                {isPending && currentReportType === 'trends' ? 'Generating...' : 'Generate Trends Report'}
+              </Button>
+            </TabsContent>
+            <TabsContent value="wastage" className="pt-4">
+              <CardDescription className="mb-4">
+                Analyze items marked as 'Wasted' to identify patterns and receive recommendations for optimizing future purchases.
+              </CardDescription>
+              <Button onClick={() => handleGenerateReport('wastage')} disabled={isPending}>
+                <Wand2 className="mr-2 h-4 w-4" />
+                 {isPending && currentReportType === 'wastage' ? 'Generating...' : 'Generate Wastage Report'}
+              </Button>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -89,7 +140,7 @@ export default function ReportsClientPage() {
             <div className="space-y-1.5">
                 <CardTitle className="flex items-center gap-2">
                 <FileText className="h-6 w-6" />
-                Inventory Analysis Report
+                {getReportTitle(currentReportType)}
                 </CardTitle>
                 <CardDescription>
                     Generated on {new Date().toLocaleString()}

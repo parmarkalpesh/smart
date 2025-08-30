@@ -37,7 +37,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   type: z.string().min(2, { message: 'Type must be at least 2 characters.' }),
   quantity: z.coerce.number().min(0, { message: 'Quantity cannot be negative.' }),
-  status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock']),
+  status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted']),
   imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   expiryDate: z.date().optional(),
 });
@@ -159,7 +159,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {(['Available', 'Checked Out', 'In Maintenance', 'Low Stock'] as ItemStatus[]).map(
+                  {(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted'] as ItemStatus[]).map(
                     (status) => (
                       <SelectItem key={status} value={status}>
                         {status}

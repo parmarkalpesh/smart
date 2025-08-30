@@ -1,5 +1,5 @@
 
-export type ItemStatus = 'Available' | 'Checked Out' | 'In Maintenance' | 'Low Stock';
+export type ItemStatus = 'Available' | 'Checked Out' | 'In Maintenance' | 'Low Stock' | 'Wasted';
 
 export interface InventoryItem {
   id: string;
