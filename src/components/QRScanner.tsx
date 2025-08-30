@@ -13,17 +13,14 @@ import { Separator } from './ui/separator';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { Camera, TriangleAlert, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-
-interface ScannedItem {
-  id: string;
-  name: string;
-  type: string;
-}
+import { useInventory } from '@/hooks/useInventory';
+import { InventoryItem } from '@/lib/types';
 
 export default function QRScanner() {
   const router = useRouter();
   const { toast } = useToast();
-  const [scannedItem, setScannedItem] = useState<ScannedItem | null>(null);
+  const { getItemById } = useInventory();
+  const [scannedItem, setScannedItem] = useState<InventoryItem | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [isScannerActive, setIsScannerActive] = useState(false);
@@ -33,8 +30,8 @@ export default function QRScanner() {
   const onScanSuccess: QrCodeSuccessCallback = (decodedText, decodedResult) => {
     stopScanner();
     try {
-      const item = JSON.parse(decodedText) as ScannedItem;
-      if (item.id && item.name && item.type) {
+      const item = getItemById(decodedText);
+      if (item) {
         setScannedItem(item);
         setScanError(null);
         toast({
@@ -42,7 +39,8 @@ export default function QRScanner() {
           description: `Item "${item.name}" found.`,
         });
       } else {
-        throw new Error('Invalid QR code format.');
+         setScannedItem(null);
+        setScanError('Item not found in inventory. Please scan a valid item QR code.');
       }
     } catch (error) {
       setScannedItem(null);
@@ -167,12 +165,20 @@ export default function QRScanner() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-start">
                         <span className="font-semibold text-lg">{scannedItem.name}</span>
                         <Badge variant="secondary">{scannedItem.type}</Badge>
                     </div>
-                    <Separator/>
-                    <div className="flex justify-between items-center pt-2">
+                     <Separator/>
+                     <div className="flex justify-between items-center pt-2">
+                        <span className="text-muted-foreground">Status</span>
+                        <Badge>{scannedItem.status}</Badge>
+                    </div>
+                     <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Quantity</span>
+                        <span>{scannedItem.quantity}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Item ID</span>
                         <span className="font-mono text-xs">{scannedItem.id}</span>
                     </div>

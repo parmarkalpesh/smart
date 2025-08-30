@@ -8,12 +8,8 @@ interface QRCodeComponentProps {
 }
 
 export default function QRCodeComponent({ item }: QRCodeComponentProps) {
-  // We serialize only essential info to keep QR code density low.
-  const qrCodeValue = JSON.stringify({
-    id: item.id,
-    name: item.name,
-    type: item.type,
-  });
+  // We serialize only the ID to keep QR code density low and for security.
+  const qrCodeValue = item.id;
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
