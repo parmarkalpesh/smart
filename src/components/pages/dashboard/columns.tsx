@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -101,6 +102,15 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
     cell: ({ row }) => {
       const date = new Date(row.getValue('dateAdded'));
       return <div>{date.toLocaleDateString()}</div>;
+    },
+  },
+  {
+    accessorKey: 'expiryDate',
+    header: 'Expiry Date',
+    cell: ({ row }) => {
+      const date = row.getValue('expiryDate') as string | undefined;
+      if (!date) return 'N/A';
+      return <div>{new Date(date).toLocaleDateString()}</div>;
     },
   },
   {

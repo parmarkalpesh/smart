@@ -27,6 +27,11 @@ import { InventoryItem, ItemStatus } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import Image from 'next/image';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { Calendar } from './ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -34,6 +39,7 @@ const formSchema = z.object({
   quantity: z.coerce.number().min(0, { message: 'Quantity cannot be negative.' }),
   status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock']),
   imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  expiryDate: z.date().optional(),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
@@ -56,6 +62,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
       quantity: item?.quantity || 0,
       status: item?.status || 'Available',
       imageUrl: item?.imageUrl || '',
+      expiryDate: item?.expiryDate ? new Date(item.expiryDate) : undefined,
     },
   });
 
@@ -63,12 +70,17 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
   const [isImageValid, setIsImageValid] = useState(true);
 
   function onSubmit(values: InventoryFormValues) {
+    const itemData = {
+      ...values,
+      expiryDate: values.expiryDate?.toISOString(),
+    };
+
     if (isEditMode && item) {
-      updateItem(item.id, values);
+      updateItem(item.id, itemData);
       toast({ title: 'Item Updated', description: `"${values.name}" has been successfully updated.` });
-      router.push(`/dashboard`);
+      router.push(`/`);
     } else {
-      const newItem = addItem(values);
+      const newItem = addItem(itemData);
       toast({ title: 'Item Added', description: `"${values.name}" has been added to inventory.` });
       router.push(`/item/${newItem.id}`);
     }
@@ -156,6 +168,47 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                   )}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="expiryDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Expiry Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <FormMessage />
             </FormItem>
           )}

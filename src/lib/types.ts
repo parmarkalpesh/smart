@@ -1,3 +1,4 @@
+
 export type ItemStatus = 'Available' | 'Checked Out' | 'In Maintenance' | 'Low Stock';
 
 export interface InventoryItem {
@@ -8,6 +9,7 @@ export interface InventoryItem {
   status: ItemStatus;
   quantity: number;
   imageUrl?: string;
+  expiryDate?: string; // ISO string for expiry
 }
 
 export interface GoogleUser {
