@@ -98,6 +98,10 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
     accessorKey: 'quantity',
     header: 'Quantity',
   },
+    {
+    accessorKey: 'location',
+    header: 'Location',
+  },
   {
     accessorKey: 'dateAdded',
     header: 'Date Added',

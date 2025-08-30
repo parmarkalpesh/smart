@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useInventory } from '@/hooks/useInventory';
@@ -86,6 +87,24 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
                         <span className="font-mono bg-muted px-2 py-1 rounded-md text-xs">{item.id}</span>
                     </div>
                     <Separator />
+                    {item.location && (
+                        <>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Location</span>
+                            <span>{item.location}</span>
+                        </div>
+                        <Separator />
+                        </>
+                    )}
+                    {item.supplier && (
+                        <>
+                        <div className="flex justify-between">
+                            <span className="text-muted-foreground">Supplier</span>
+                            <span>{item.supplier}</span>
+                        </div>
+                        <Separator />
+                        </>
+                    )}
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">Date Added</span>
                         <span>{new Date(item.dateAdded).toLocaleString()}</span>

@@ -10,6 +10,8 @@ export interface InventoryItem {
   quantity: number;
   imageUrl?: string;
   expiryDate?: string; // ISO string for expiry
+  location?: string;
+  supplier?: string;
 }
 
 export interface GoogleUser {

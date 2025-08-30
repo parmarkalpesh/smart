@@ -40,6 +40,8 @@ const formSchema = z.object({
   status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted']),
   imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   expiryDate: z.date().optional(),
+  location: z.string().optional(),
+  supplier: z.string().optional(),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
@@ -63,6 +65,8 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
       status: item?.status || 'Available',
       imageUrl: item?.imageUrl || '',
       expiryDate: item?.expiryDate ? new Date(item.expiryDate) : undefined,
+      location: item?.location || '',
+      supplier: item?.supplier || '',
     },
   });
 
@@ -168,6 +172,32 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                   )}
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. Warehouse A, Shelf 3" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="supplier"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Supplier</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g. Supplier Inc." {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
