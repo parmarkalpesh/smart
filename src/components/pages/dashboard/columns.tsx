@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, ArrowUpDown, Trash2, Edit } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Trash2, Edit, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -101,6 +101,11 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
     {
     accessorKey: 'location',
     header: 'Location',
+    cell: ({ row }) => {
+      const location = row.getValue('location') as string | undefined;
+      if (!location) return null;
+      return <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /><span>{location}</span></div>
+    }
   },
   {
     accessorKey: 'dateAdded',

@@ -13,7 +13,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateInventoryReportInputSchema = z.object({
-  inventoryData: z.string().describe('JSON string of the current inventory data. Array of objects with fields like name, type, date, status, quantity, etc.'),
+  inventoryData: z.string().describe('JSON string of the current inventory data. Array of objects with fields like name, type, date, status, quantity, location, etc.'),
 });
 export type GenerateInventoryReportInput = z.infer<typeof GenerateInventoryReportInputSchema>;
 
@@ -37,12 +37,12 @@ You are provided with current inventory data. Your task is to analyze this data 
 The report must be in markdown format and include the following sections:
 
 **1. Demand Forecast & Stock-out Alerts:**
-- Analyze the provided inventory data to forecast future product demand, considering item types and seasonality.
+- Analyze the provided inventory data to forecast future product demand, considering item types, seasonality, and location.
 - Identify and alert about any items at risk of stocking out soon based on their current quantity and predicted demand.
-- Provide a brief summary of your findings.
+- Provide a brief summary of your findings. For example, you might suggest consolidating stock from different locations if applicable.
 
 **2. Optimal Stock Level Recommendations:**
-- Based on your forecast, create a markdown table with the columns: "Product Name", "Current Quantity", "Predicted Trend", and "Recommendation".
+- Based on your forecast, create a markdown table with the columns: "Product Name", "Location", "Current Quantity", "Predicted Trend", and "Recommendation".
 - In the "Recommendation" column, suggest optimal stock levels and specific restocking actions (e.g., "Increase stock to 50 units," "Maintain current level," "Reorder 20 units before next month").
 
 **3. Waste Reduction Action Plan:**

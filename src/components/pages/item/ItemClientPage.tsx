@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { InventoryItem } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import {ImageIcon} from 'lucide-react';
+import {ImageIcon, Fingerprint, MapPin, Building, Calendar} from 'lucide-react';
 
 export default function ItemClientPage({ itemId }: { itemId: string }) {
   const { getItemById } = useInventory();
@@ -81,33 +81,45 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
                 <CardHeader>
                     <CardTitle>Item Details</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">ID</span>
+                <CardContent className="space-y-4 text-sm">
+                    <div className="flex items-start justify-between">
+                        <div className='flex items-center gap-2'>
+                           <Fingerprint className="h-4 w-4 text-muted-foreground" />
+                           <span className="text-muted-foreground">ID</span>
+                        </div>
                         <span className="font-mono bg-muted px-2 py-1 rounded-md text-xs">{item.id}</span>
                     </div>
                     <Separator />
                     {item.location && (
                         <>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Location</span>
-                            <span>{item.location}</span>
+                        <div className="flex items-center justify-between">
+                            <div className='flex items-center gap-2'>
+                                <MapPin className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-muted-foreground">Location</span>
+                            </div>
+                            <span className='font-medium'>{item.location}</span>
                         </div>
                         <Separator />
                         </>
                     )}
                     {item.supplier && (
                         <>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Supplier</span>
-                            <span>{item.supplier}</span>
+                        <div className="flex items-center justify-between">
+                             <div className='flex items-center gap-2'>
+                                <Building className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-muted-foreground">Supplier</span>
+                            </div>
+                            <span className='font-medium'>{item.supplier}</span>
                         </div>
                         <Separator />
                         </>
                     )}
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Date Added</span>
-                        <span>{new Date(item.dateAdded).toLocaleString()}</span>
+                    <div className="flex items-center justify-between">
+                         <div className='flex items-center gap-2'>
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Date Added</span>
+                        </div>
+                        <span className='font-medium'>{new Date(item.dateAdded).toLocaleDateString()}</span>
                     </div>
                 </CardContent>
             </Card>
