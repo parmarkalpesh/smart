@@ -40,6 +40,19 @@ export default function ReportsClientPage() {
     });
   };
 
+  const handleDownloadReport = () => {
+    if (!report) return;
+    const blob = new Blob([report], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'inventory-report.md';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
        <InventoryChart items={items} />
@@ -72,11 +85,17 @@ export default function ReportsClientPage() {
 
       {report && (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-6 w-6" />
-              Inventory Analysis Report
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="space-y-1.5">
+                <CardTitle className="flex items-center gap-2">
+                <FileText className="h-6 w-6" />
+                Inventory Analysis Report
+                </CardTitle>
+                <CardDescription>
+                    Generated on {new Date().toLocaleString()}
+                </CardDescription>
+            </div>
+            <Button variant="outline" onClick={handleDownloadReport}>Download Report</Button>
           </CardHeader>
           <CardContent>
             <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap font-body">

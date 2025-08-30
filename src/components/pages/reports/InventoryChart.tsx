@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -32,7 +33,16 @@ export default function InventoryChart({ items }: InventoryChartProps) {
 
 
   if (chartData.length === 0) {
-    return null;
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>Inventory Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">No data available to display a chart.</p>
+            </CardContent>
+        </Card>
+    );
   }
 
   return (
@@ -57,7 +67,6 @@ export default function InventoryChart({ items }: InventoryChartProps) {
                     cursor={false}
                     content={<ChartTooltipContent indicator="dot" />}
                 />
-                <Legend />
                 <Bar dataKey="quantity" fill="var(--color-quantity)" radius={4} />
             </BarChart>
         </ChartContainer>
