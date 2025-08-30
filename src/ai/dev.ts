@@ -4,3 +4,4 @@ config();
 
 import '@/ai/flows/generate-inventory-report.ts';
 import '@/ai/flows/generate-wastage-report.ts';
+import '@/ai/flows/process-voice-note.ts';

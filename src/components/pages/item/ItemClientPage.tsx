@@ -8,19 +8,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import QRCodeComponent from '@/components/QRCodeComponent';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
-import { InventoryItem } from '@/lib/types';
+import { InventoryItem, VoiceNote } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import {ImageIcon, Fingerprint, MapPin, Building, Calendar} from 'lucide-react';
+import {ImageIcon, Fingerprint, MapPin, Building, Calendar, MessageSquare, Mic} from 'lucide-react';
+import VoiceNoteRecorder from './VoiceNoteRecorder';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function ItemClientPage({ itemId }: { itemId: string }) {
-  const { getItemById } = useInventory();
+  const { getItemById, updateItem } = useInventory();
   const [item, setItem] = useState<InventoryItem | undefined | null>(undefined);
 
   useEffect(() => {
     const foundItem = getItemById(itemId);
     setItem(foundItem);
   }, [itemId, getItemById]);
+
+  const handleNoteAdded = (note: Omit<VoiceNote, 'id' | 'createdAt'>) => {
+    if (!item) return;
+    const newNote: VoiceNote = {
+      ...note,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    };
+    const updatedNotes = [...(item.voiceNotes || []), newNote];
+    updateItem(item.id, { voiceNotes: updatedNotes });
+    setItem(prevItem => prevItem ? { ...prevItem, voiceNotes: updatedNotes } : null);
+  }
 
 
   if (item === undefined) {
@@ -33,7 +47,7 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
 
   return (
     <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-6">
             <Card>
                 <CardHeader>
                 <CardTitle>Edit Item</CardTitle>
@@ -41,6 +55,37 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
                 </CardHeader>
                 <CardContent>
                     <InventoryItemForm item={item} />
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Mic />Voice Notes</CardTitle>
+                    <CardDescription>Record and review audio notes for this item. Notes are transcribed and summarized by AI.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                   <VoiceNoteRecorder onNoteAdded={handleNoteAdded} />
+                   {item.voiceNotes && item.voiceNotes.length > 0 && <Separator />}
+                   <ScrollArea className="h-72">
+                    <div className="space-y-4 pr-4">
+                    {item.voiceNotes?.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(note => (
+                      <Card key={note.id} className="bg-muted/50">
+                        <CardHeader className="pb-2">
+                          <CardDescription>
+                            Recorded on {new Date(note.createdAt).toLocaleString()}
+                          </CardDescription>
+                          <CardTitle className="text-base font-semibold">{note.summary}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <audio controls src={note.audioDataUri} className="w-full" />
+                          <details>
+                              <summary className="text-sm font-medium cursor-pointer">View full transcription</summary>
+                              <p className="mt-2 text-sm text-muted-foreground whitespace-pre-wrap">{note.transcription}</p>
+                          </details>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    </div>
+                   </ScrollArea>
                 </CardContent>
             </Card>
         </div>
