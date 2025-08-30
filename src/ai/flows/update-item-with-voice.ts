@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { ItemStatus } from '@/lib/types';
 
 // The input schema for the flow
 const UpdateItemWithTextInputSchema = z.object({

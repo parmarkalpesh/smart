@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { InventoryItem, VoiceNote } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import {ImageIcon, Fingerprint, MapPin, Building, Calendar, MessageSquare, Mic, Bot} from 'lucide-react';
+import {ImageIcon, Fingerprint, MapPin, Building, Calendar, Mic, Bot} from 'lucide-react';
 import VoiceNoteRecorder from './VoiceNoteRecorder';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import VoiceCommandInput from './VoiceCommandInput';
