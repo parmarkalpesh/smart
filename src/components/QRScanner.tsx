@@ -33,12 +33,11 @@ export default function QRScanner() {
     try {
       const item = getItemById(decodedText);
       if (item) {
-        setScannedItem(item);
-        setScanError(null);
         toast({
           title: 'Scan Successful!',
-          description: `Item "${item.name}" found.`,
+          description: `Item "${item.name}" found. Redirecting...`,
         });
+        router.push(`/item/${item.id}`);
       } else {
          setScannedItem(null);
         setScanError('Item not found in inventory. Please scan a valid item QR code.');
@@ -124,7 +123,7 @@ export default function QRScanner() {
         <div className="w-full aspect-square bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
             <div id="video-container" ref={videoRef} className="w-full h-full" />
             
-            {!isScannerActive && !scannedItem && (
+            {!isScannerActive && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 text-white p-4 text-center">
                     {hasCameraPermission === null && (
                       <div className="flex items-center gap-2">
@@ -159,52 +158,10 @@ export default function QRScanner() {
             </Alert>
         )}
 
-        {scannedItem && (
-            <Card>
-            <CardHeader>
-                <CardTitle>Scanned Item Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                 {scannedItem.imageUrl ? (
-                    <div className="aspect-video relative">
-                        <Image src={scannedItem.imageUrl} alt={scannedItem.name} fill className="rounded-md object-cover" />
-                    </div>
-                ) : (
-                    <div className="aspect-video flex items-center justify-center bg-muted rounded-md">
-                        <ImageIcon className="h-12 w-12 text-muted-foreground" />
-                    </div>
-                )}
-                <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-start">
-                        <span className="font-semibold text-lg">{scannedItem.name}</span>
-                        <Badge variant="secondary">{scannedItem.type}</Badge>
-                    </div>
-                     <Separator/>
-                     <div className="flex justify-between items-center pt-2">
-                        <span className="text-muted-foreground">Status</span>
-                        <Badge>{scannedItem.status}</Badge>
-                    </div>
-                     <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Quantity</span>
-                        <span>{scannedItem.quantity}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Item ID</span>
-                        <span className="font-mono text-xs">{scannedItem.id}</span>
-                    </div>
-                     <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Date Added</span>
-                        <span>{new Date(scannedItem.dateAdded).toLocaleDateString()}</span>
-                    </div>
-                </div>
-                <div className="flex gap-2">
-                <Button onClick={resetScanner} variant="outline" className="w-full">Scan Another</Button>
-                <Button asChild className="w-full">
-                    <Link href={`/item/${scannedItem.id}`}>View Full Details</Link>
-                </Button>
-                </div>
-            </CardContent>
-            </Card>
+        {(isScannerActive && !scanError) && (
+            <div className="text-center text-muted-foreground">
+                <p>Scanning for QR code...</p>
+            </div>
         )}
     </div>
   );
