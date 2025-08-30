@@ -154,18 +154,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive('/investigator')}
-                    tooltip="AI Investigator"
-                  >
-                    <Link href="/investigator">
-                      <MessageSquareHeart />
-                      <span>Investigator</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
               </>
             )}
           </SidebarMenu>

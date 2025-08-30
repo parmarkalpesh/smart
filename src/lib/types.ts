@@ -32,14 +32,3 @@ export interface GoogleUser {
     email: string;
     picture: string;
 }
-
-export type History = {
-  role: 'user' | 'model';
-  content: string;
-}[];
-
-export interface InvestigateInventoryInput {
-  query: string;
-  inventoryData: string;
-  history?: History;
-}
