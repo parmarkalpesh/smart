@@ -11,13 +11,16 @@ import { useEffect, useState } from 'react';
 import { InventoryItem, VoiceNote } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import Image from 'next/image';
-import {ImageIcon, Fingerprint, MapPin, Building, Calendar, MessageSquare, Mic} from 'lucide-react';
+import {ImageIcon, Fingerprint, MapPin, Building, Calendar, MessageSquare, Mic, Bot} from 'lucide-react';
 import VoiceNoteRecorder from './VoiceNoteRecorder';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import VoiceCommandRecorder from './VoiceCommandRecorder';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ItemClientPage({ itemId }: { itemId: string }) {
   const { getItemById, updateItem } = useInventory();
   const [item, setItem] = useState<InventoryItem | undefined | null>(undefined);
+  const { toast } = useToast();
 
   useEffect(() => {
     const foundItem = getItemById(itemId);
@@ -36,6 +39,18 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
     setItem(prevItem => prevItem ? { ...prevItem, voiceNotes: updatedNotes } : null);
   }
 
+  const handleVoiceUpdate = (updates: Partial<InventoryItem>) => {
+    if (!item) return;
+    updateItem(item.id, updates);
+    // Directly update the state to re-render the form with new values
+    const updatedItem = { ...item, ...updates };
+    setItem(updatedItem);
+     toast({
+        title: 'Item Updated by Voice',
+        description: 'The item details have been successfully updated.',
+    });
+  }
+
 
   if (item === undefined) {
     return <ItemSkeleton />;
@@ -50,11 +65,21 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
         <div className="md:col-span-2 space-y-6">
             <Card>
                 <CardHeader>
-                <CardTitle>Edit Item</CardTitle>
-                <CardDescription>Update the details of "{item.name}".</CardDescription>
+                    <CardTitle>Edit Item</CardTitle>
+                    <CardDescription>Update the details of "{item.name}" manually, or use your voice.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <InventoryItemForm item={item} />
+                     {/* Pass a key to the form to force re-render when item state changes */}
+                    <InventoryItemForm key={JSON.stringify(item)} item={item} />
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Bot /> Voice Command</CardTitle>
+                    <CardDescription>Update item details using a voice command. Try saying: "Change status to wasted" or "Update quantity to 25".</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <VoiceCommandRecorder itemId={item.id} onUpdate={handleVoiceUpdate} />
                 </CardContent>
             </Card>
             <Card>
@@ -125,7 +150,7 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
             <Card>
                 <CardHeader>
                     <CardTitle>Item Details</CardTitle>
-                </CardHeader>
+                </Header>
                 <CardContent className="space-y-4 text-sm">
                     <div className="flex items-start justify-between">
                         <div className='flex items-center gap-2'>

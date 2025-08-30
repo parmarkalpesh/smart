@@ -1,0 +1,102 @@
+
+'use server';
+/**
+ * @fileOverview Updates an inventory item using a voice command.
+ *
+ * - updateItemWithVoice - A function that handles the voice command processing.
+ * - UpdateItemWithVoiceInput - The input type for the function.
+ * - UpdateItemWithVoiceOutput - The return type for the function.
+ */
+
+import {ai} from '@/ai/genkit';
+import {z} from 'genkit';
+import { ItemStatus } from '@/lib/types';
+
+// The input schema for the flow
+const UpdateItemWithVoiceInputSchema = z.object({
+  audioDataUri: z
+    .string()
+    .describe(
+      "An audio recording of a user command, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+  itemId: z.string().describe('The ID of the inventory item to update.'),
+});
+export type UpdateItemWithVoiceInput = z.infer<typeof UpdateItemWithVoiceInputSchema>;
+
+// The output schema defines the possible fields that can be updated.
+// It's a partial object, so only the fields mentioned in the voice command will be present.
+const UpdateItemWithVoiceOutputSchema = z.object({
+    name: z.string().optional(),
+    type: z.string().optional(),
+    quantity: z.number().optional(),
+    status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted']).optional(),
+    location: z.string().optional(),
+    supplier: z.string().optional(),
+});
+export type UpdateItemWithVoiceOutput = z.infer<typeof UpdateItemWithVoiceOutputSchema>;
+
+
+// The main exported function that the client will call.
+export async function updateItemWithVoice(input: UpdateItemWithVoiceInput): Promise<UpdateItemWithVoiceOutput> {
+  return updateItemWithVoiceFlow(input);
+}
+
+
+// The tool that the AI will use to specify the updates.
+const itemUpdateTool = ai.defineTool(
+    {
+        name: 'updateInventoryItem',
+        description: 'Updates the fields of an inventory item based on the user\'s voice command. Only specify the fields that the user explicitly mentioned to change.',
+        inputSchema: UpdateItemWithVoiceOutputSchema,
+        outputSchema: z.any(),
+    },
+    async (input) => {
+        // In a real-world scenario, you might perform validation or other actions here.
+        // For this implementation, the tool's purpose is to structure the data for the client.
+        return input;
+    }
+)
+
+// The main Genkit flow.
+const updateItemWithVoiceFlow = ai.defineFlow(
+  {
+    name: 'updateItemWithVoiceFlow',
+    inputSchema: UpdateItemWithVoiceInputSchema,
+    outputSchema: UpdateItemWithVoiceOutputSchema,
+  },
+  async (input) => {
+    // The prompt that instructs the model on how to behave.
+    const prompt = `You are a voice assistant for an inventory management system.
+    A user has provided a voice command to update an inventory item.
+    Transcribe the audio and determine which fields to update.
+    Use the 'updateInventoryItem' tool to specify the new values.
+    If the user's command is unclear or does not seem to relate to updating an inventory item,
+    call the tool with an empty object.
+
+    Audio command: {{media url=audioDataUri}}`;
+
+    const llmResponse = await ai.generate({
+      prompt: prompt,
+      model: 'googleai/gemini-2.5-flash',
+      tools: [itemUpdateTool],
+      toolChoice: 'required', // Force the model to use the tool.
+      input: {
+        audioDataUri: input.audioDataUri,
+      },
+      config: {
+        // Lower temperature for more deterministic, structured output
+        temperature: 0.1, 
+      }
+    });
+
+    const toolRequest = llmResponse.toolRequest();
+    
+    if (toolRequest?.name === 'updateInventoryItem' && toolRequest.input) {
+        // The validated and structured data from the tool call is our output.
+        return toolRequest.input;
+    }
+
+    // If the tool wasn't called correctly or the input was empty, return an empty object.
+    return {};
+  }
+);
