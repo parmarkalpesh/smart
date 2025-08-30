@@ -4,8 +4,8 @@
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Bot, Mic, MicOff, Square, Loader2, TriangleAlert } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { Bot, Mic, Square, Loader2, TriangleAlert } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { updateItemWithVoice } from '@/ai/flows/update-item-with-voice';
 import { InventoryItem } from '@/lib/types';
 
@@ -21,17 +21,32 @@ export default function VoiceCommandRecorder({ itemId, onUpdate }: VoiceCommandR
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const stopRecordingAndProcess = useCallback(async () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+  }, []);
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
+    const initializeMediaRecorder = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream;
         setHasPermission(true);
-        mediaRecorderRef.current = new MediaRecorder(stream);
-        mediaRecorderRef.current.ondataavailable = event => {
+        const recorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = recorder;
+
+        recorder.ondataavailable = event => {
           audioChunksRef.current.push(event.data);
         };
-        mediaRecorderRef.current.onstop = async () => {
+
+        recorder.onstop = async () => {
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          if (audioBlob.size === 0) return;
+
           const reader = new FileReader();
           reader.readAsDataURL(audioBlob);
           reader.onloadend = async () => {
@@ -67,25 +82,31 @@ export default function VoiceCommandRecorder({ itemId, onUpdate }: VoiceCommandR
           };
           audioChunksRef.current = [];
         };
-      })
-      .catch(err => {
+
+      } catch (err) {
         console.error("Mic permission denied:", err);
         setHasPermission(false);
-      });
+      }
+    };
+    initializeMediaRecorder();
+
+    return () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+        }
+    }
   }, [itemId, onUpdate, toast]);
 
-  const startRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'inactive') {
-      mediaRecorderRef.current.start();
-      setIsRecording(true);
-      toast({ title: 'Listening...', description: 'Please state your command.' });
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+  const handleRecordButtonClick = () => {
+    if (isRecording) {
+      stopRecordingAndProcess();
+    } else {
+      if (mediaRecorderRef.current) {
+        audioChunksRef.current = [];
+        mediaRecorderRef.current.start();
+        setIsRecording(true);
+        toast({ title: 'Listening...', description: 'Please state your command.' });
+      }
     }
   };
   
@@ -112,26 +133,24 @@ export default function VoiceCommandRecorder({ itemId, onUpdate }: VoiceCommandR
 
   return (
     <div className="space-y-4">
-      {isRecording ? (
-        <Button onClick={stopRecording} className="w-full" variant="destructive">
-          <Square className="mr-2 h-4 w-4 animate-glow" />
-          Stop Recording
-        </Button>
-      ) : (
-        <Button onClick={startRecording} className="w-full" disabled={isProcessing}>
-           {isProcessing ? (
-             <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing Command...
-             </>
-           ) : (
-             <>
-                <Bot className="mr-2 h-4 w-4" />
-                Update with Voice Command
+      <Button onClick={handleRecordButtonClick} className="w-full" disabled={isProcessing} variant={isRecording ? "destructive" : "default"}>
+          {isProcessing ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing Command...
             </>
-           )}
+          ) : isRecording ? (
+            <>
+              <Square className="mr-2 h-4 w-4 animate-pulse" />
+              Stop Recording
+            </>
+          ) : (
+            <>
+              <Bot className="mr-2 h-4 w-4" />
+              Update with Voice Command
+            </>
+          )}
         </Button>
-      )}
     </div>
   );
 }
