@@ -10,15 +10,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { QrCode } from 'lucide-react';
-import { useGoogleLogin } from '@react-oauth/google';
 
 export default function LoginPage() {
   const { handleGoogleLogin } = useAuth();
-
-  const login = useGoogleLogin({
-    onSuccess: handleGoogleLogin,
-    onError: (error) => console.error('Login Failed:', error),
-  });
 
   const GoogleIcon = () => (
     <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48">
@@ -46,7 +40,7 @@ export default function LoginPage() {
           <CardDescription>Sign in with your Google account to continue.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button className="w-full" onClick={() => login()}>
+          <Button className="w-full" onClick={handleGoogleLogin}>
             <GoogleIcon />
             Sign in with Google
           </Button>

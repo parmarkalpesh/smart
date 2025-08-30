@@ -128,13 +128,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Separator className="my-2 bg-sidebar-border" />
            <div className="flex items-center gap-3 px-2 py-1">
               <Avatar className="h-9 w-9">
-                  <AvatarImage src={user?.picture} alt={user?.name ?? ''} />
+                  <AvatarImage src={user?.photoURL ?? undefined} alt={user?.displayName ?? ''} />
                   <AvatarFallback>
                     <User />
                   </AvatarFallback>
               </Avatar>
               <div className="flex flex-col text-sm">
-                  <span className="font-semibold text-sidebar-foreground capitalize">{user?.name}</span>
+                  <span className="font-semibold text-sidebar-foreground capitalize">{user?.displayName}</span>
                   <span className="text-xs text-sidebar-foreground/70">{user?.email}</span>
               </div>
           </div>
