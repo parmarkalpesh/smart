@@ -109,9 +109,9 @@ export default function QRScanner() {
             </div>
             <div className="flex gap-2">
               <Button onClick={resetScanner} variant="outline" className="w-full">Scan Another</Button>
-              <Link href={`/item/${scannedItem.id}`} passHref className="w-full">
-                <Button className="w-full">View Full Details</Button>
-              </Link>
+              <Button asChild className="w-full">
+                <Link href={`/item/${scannedItem.id}`}>View Full Details</Link>
+              </Button>
             </div>
           </CardContent>
         </Card>

@@ -113,12 +113,12 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <Link href={`/item/${item.id}`}>
-                <DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/item/${item.id}`}>
                   <Eye className="mr-2 h-4 w-4" />
                   View/Edit Item
-                </DropdownMenuItem>
-              </Link>
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               {userRole === 'admin' && (
                 <AlertDialogTrigger asChild>

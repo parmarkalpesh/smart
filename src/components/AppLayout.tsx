@@ -85,38 +85,41 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/dashboard" legacyBehavior passHref>
-                <SidebarMenuButton
-                  isActive={isActive('/dashboard')}
-                  tooltip="Dashboard"
-                >
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/dashboard')}
+                tooltip="Dashboard"
+              >
+                <Link href="/dashboard">
                   <LayoutDashboard />
                   <span>Dashboard</span>
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link href="/scanner" legacyBehavior passHref>
-                <SidebarMenuButton
-                  isActive={isActive('/scanner')}
-                  tooltip="Scan Item"
-                >
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/scanner')}
+                tooltip="Scan Item"
+              >
+                <Link href="/scanner">
                   <ScanLine />
                   <span>Scan Item</span>
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
             {userRole === 'admin' && (
               <SidebarMenuItem>
-                <Link href="/reports" legacyBehavior passHref>
-                  <SidebarMenuButton
-                    isActive={isActive('/reports')}
-                    tooltip="AI Reports"
-                  >
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive('/reports')}
+                  tooltip="AI Reports"
+                >
+                  <Link href="/reports">
                     <BarChart2 />
                     <span>AI Reports</span>
-                  </SidebarMenuButton>
-                </Link>
+                  </Link>
+                </SidebarMenuButton>
               </SidebarMenuItem>
             )}
           </SidebarMenu>
