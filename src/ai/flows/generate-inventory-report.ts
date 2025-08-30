@@ -39,7 +39,7 @@ The report must be in markdown format and include the following sections:
 **1. Demand Forecast & Stock-out Alerts:**
 - Analyze the provided inventory data to forecast future product demand, considering item types, seasonality, and location.
 - Identify and alert about any items at risk of stocking out soon based on their current quantity and predicted demand.
-- Provide a brief summary of your findings. For example, you might suggest consolidating stock from different locations if applicable.
+- Provide a brief summary of your findings. For example, you might suggest consolidating stock by redistributing items from a location with a surplus to one with a deficit.
 
 **2. Optimal Stock Level Recommendations:**
 - Based on your forecast, create a markdown table with the columns: "Product Name", "Location", "Current Quantity", "Predicted Trend", and "Recommendation".

@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -23,13 +24,21 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import React from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { InventoryItem } from '@/lib/types';
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends InventoryItem, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends InventoryItem, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -53,9 +62,19 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const uniqueLocations = React.useMemo(() => {
+    const locations = new Set<string>();
+    data.forEach(item => {
+      if (item.location) {
+        locations.add(item.location);
+      }
+    });
+    return Array.from(locations);
+  }, [data]);
+
   return (
     <div>
-        <div className="flex items-center py-4">
+        <div className="flex items-center py-4 gap-4">
             <Input
             placeholder="Filter by name..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -64,6 +83,28 @@ export function DataTable<TData, TValue>({
             }
             className="max-w-sm"
             />
+            <Select
+                value={(table.getColumn("location")?.getFilterValue() as string) ?? "all"}
+                onValueChange={(value) => {
+                    if (value === "all") {
+                        table.getColumn("location")?.setFilterValue(undefined);
+                    } else {
+                        table.getColumn("location")?.setFilterValue(value);
+                    }
+                }}
+            >
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter by location" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="all">All Locations</SelectItem>
+                    {uniqueLocations.map((location) => (
+                        <SelectItem key={location} value={location}>
+                            {location}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
         </div>
       <div className="rounded-md border">
         <Table>
