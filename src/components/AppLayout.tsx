@@ -140,30 +140,34 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-             <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/purchasing')}
-                tooltip="Purchasing"
-              >
-                <Link href="/purchasing">
-                  <ShoppingCart />
-                  <span>Purchasing</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive('/investigator')}
-                tooltip="AI Investigator"
-              >
-                <Link href="/investigator">
-                  <MessageSquareHeart />
-                  <span>Investigator</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            {user.role === 'admin' && (
+              <>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive('/purchasing')}
+                    tooltip="Purchasing"
+                  >
+                    <Link href="/purchasing">
+                      <ShoppingCart />
+                      <span>Purchasing</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive('/investigator')}
+                    tooltip="AI Investigator"
+                  >
+                    <Link href="/investigator">
+                      <MessageSquareHeart />
+                      <span>Investigator</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
+            )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
