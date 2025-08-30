@@ -17,7 +17,7 @@ const UpdateItemWithVoiceInputSchema = z.object({
   audioDataUri: z
     .string()
     .describe(
-      "An audio recording of a user command, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "An audio recording of a user command, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
     ),
   itemId: z.string().describe('The ID of the inventory item to update.'),
 });

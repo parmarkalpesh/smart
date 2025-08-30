@@ -41,10 +41,9 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
 
   const handleVoiceUpdate = (updates: Partial<InventoryItem>) => {
     if (!item) return;
+    const updatedItemData = { ...item, ...updates };
     updateItem(item.id, updates);
-    // Directly update the state to re-render the form with new values
-    const updatedItem = { ...item, ...updates };
-    setItem(updatedItem);
+    setItem(updatedItemData);
      toast({
         title: 'Item Updated by Voice',
         description: 'The item details have been successfully updated.',
