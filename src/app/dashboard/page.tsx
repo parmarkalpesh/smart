@@ -1,19 +1,10 @@
-import AppLayout from '@/components/AppLayout';
-import InventoryClientPage from '@/components/pages/dashboard/InventoryClientPage';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
 
-export default function DashboardPage() {
+export default function DashboardRedirectPage() {
   return (
-    <AppLayout>
-      <Card>
-        <CardHeader>
-          <CardTitle>Inventory Overview</CardTitle>
-          <CardDescription>View, manage, and track all your items in real-time.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <InventoryClientPage />
-        </CardContent>
-      </Card>
-    </AppLayout>
+    <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+        <p className="text-muted-foreground">This page has moved.</p>
+        <Link href="/" className="text-primary hover:underline">Go to Dashboard</Link>
+    </div>
   );
 }
