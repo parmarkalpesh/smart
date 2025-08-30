@@ -8,9 +8,20 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import DashboardStats from './DashboardStats';
+import { useEffect, useState } from 'react';
 
 export default function InventoryClientPage() {
   const { items, deleteItem } = useInventory();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    // You can render a skeleton loader here if you want
+    return null; 
+  }
 
   return (
     <div className="space-y-4">
