@@ -42,21 +42,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-      if (user) {
-        router.push('/dashboard');
-      } else {
-        router.push('/login');
-      }
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the user state and redirection
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+      router.push('/dashboard');
     } catch (error) {
       console.error('Google Sign-in Error:', error);
     }
@@ -65,7 +61,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       await signOut(auth);
-      // onAuthStateChanged will handle the user state and redirection
+      setUser(null);
+      router.push('/login');
     } catch (error) {
       console.error('Logout Error:', error);
     }
@@ -73,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, userRole, loading, handleGoogleLogin, logout }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
