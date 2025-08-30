@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/hooks/useInventory';
 import { generatePurchaseOrders } from '@/ai/flows/generate-purchase-orders';
-import { Wand2, FileText, TriangleAlert, Download, History } from 'lucide-react';
+import { Wand2, FileText, TriangleAlert, Download, History, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,9 +29,12 @@ export default function PurchasingClientPage() {
           inventoryData: JSON.stringify(items),
         });
         setReport(result.report);
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
-        const errorMessage = `Failed to generate purchase orders. Please try again later.`;
+        let errorMessage = 'Failed to generate purchase orders. Please try again later.';
+        if (e.message && e.message.includes('503')) {
+            errorMessage = 'The AI model is currently overloaded. Please wait a moment and try again.';
+        }
         setError(errorMessage);
         toast({
           variant: 'destructive',
@@ -77,8 +80,20 @@ export default function PurchasingClientPage() {
       {error && (
         <Alert variant="destructive">
           <TriangleAlert className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertTitle>Error Generating Report</AlertTitle>
+          <AlertDescription>
+            <p>{error}</p>
+             <Button
+                variant="secondary"
+                size="sm"
+                className="mt-4"
+                onClick={handleGenerateReport}
+                disabled={isPending}
+            >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {isPending ? 'Retrying...' : 'Try Again'}
+            </Button>
+          </AlertDescription>
         </Alert>
       )}
 
