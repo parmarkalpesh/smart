@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/hooks/useInventory';
@@ -11,6 +11,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { marked } from 'marked';
 
 export default function PurchasingClientPage() {
   const { items } = useInventory();
@@ -18,6 +21,7 @@ export default function PurchasingClientPage() {
   const [isPending, startTransition] = useTransition();
   const [report, setReport] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   const handleGenerateReport = () => {
     setError(null);
@@ -45,18 +49,39 @@ export default function PurchasingClientPage() {
     });
   };
 
-  const handleDownloadReport = () => {
-    if (!report) return;
-    const blob = new Blob([report], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `purchase-orders-${new Date().toISOString().split('T')[0]}.md`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleDownloadReport = async () => {
+    if (!reportRef.current) return;
+
+    try {
+        const canvas = await html2canvas(reportRef.current, {
+            scale: 2, // Higher scale for better quality
+        });
+        const imgData = canvas.toDataURL('image/png');
+        
+        const pdf = new jsPDF({
+            orientation: 'p',
+            unit: 'px',
+            format: [canvas.width, canvas.height]
+        });
+
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(`purchase-orders-${new Date().toISOString().split('T')[0]}.pdf`);
+
+    } catch (error) {
+        console.error("Failed to generate PDF", error);
+        toast({
+            variant: 'destructive',
+            title: 'Download Failed',
+            description: 'Could not generate the PDF. Please try again.',
+        });
+    }
   };
+  
+  const reportHtml = useMemo(() => {
+    if (!report) return '';
+    return marked(report) as string;
+  }, [report]);
+
 
   return (
     <div className="space-y-6">
@@ -111,12 +136,11 @@ export default function PurchasingClientPage() {
             </div>
             <Button variant="outline" onClick={handleDownloadReport}>
                 <Download className="mr-2 h-4 w-4" />
-                Download
+                Download PDF
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap font-body">
-              {report}
+            <div ref={reportRef} className="prose prose-sm dark:prose-invert max-w-none p-4 bg-background" dangerouslySetInnerHTML={{ __html: reportHtml }}>
             </div>
           </CardContent>
         </Card>
