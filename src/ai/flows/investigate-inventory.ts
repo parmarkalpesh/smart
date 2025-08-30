@@ -10,7 +10,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { Message } from 'genkit/experimental/ai';
+import type { Message } from 'genkit/experimental/ai';
 import type { InvestigateInventoryInput, History } from '@/lib/types';
 
 
@@ -22,20 +22,6 @@ const GetInventoryInputSchema = z.object({
     type: z.string().optional().describe('Filter by the type of the item (e.g., "Electronics", "Furniture").'),
   }).optional().describe('The filter to apply when fetching inventory data. If no filter is provided, all items are returned.'),
 });
-
-// Define the schema for the history of the conversation.
-const HistorySchema = z.array(z.object({
-  role: z.enum(['user', 'model']),
-  content: z.string(),
-}));
-
-// Define the input for the main investigation flow.
-const InvestigateInventoryInputSchema = z.object({
-  query: z.string().describe('The user\'s question or command.'),
-  inventoryData: z.string().describe('The full inventory data as a JSON string. This will be used by the tool.'),
-  history: HistorySchema.optional().describe('The conversation history.'),
-});
-
 
 /**
  * The main function that clients will call to interact with the AI investigator.
@@ -102,7 +88,14 @@ If the query is outside the scope of inventory management, politely decline to a
 const investigateInventoryFlow = ai.defineFlow(
   {
     name: 'investigateInventoryFlow',
-    inputSchema: InvestigateInventoryInputSchema,
+    inputSchema: z.object({
+      query: z.string().describe('The user\'s question or command.'),
+      inventoryData: z.string().describe('The full inventory data as a JSON string. This will be used by the tool.'),
+      history: z.array(z.object({
+        role: z.enum(['user', 'model']),
+        content: z.string(),
+      })).optional().describe('The conversation history.'),
+    }),
     outputSchema: z.string(),
   },
   async (input) => {
@@ -111,8 +104,8 @@ const investigateInventoryFlow = ai.defineFlow(
     // Construct the full prompt, including history and the latest query.
     const fullPrompt: Message[] = [
       ...(history || []).map(msg => ({
-          role: msg.role as 'user' | 'model',
-          content: [{ text: msg.content }],
+          role: msg.role,
+          content: [{text: msg.content}],
       })),
       {
         role: 'user',
