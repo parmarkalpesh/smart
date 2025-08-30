@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useInventory } from '@/hooks/useInventory';
@@ -6,12 +7,10 @@ import { DataTable } from './data-table';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
 import DashboardStats from './DashboardStats';
 
 export default function InventoryClientPage() {
   const { items, deleteItem } = useInventory();
-  const { userRole } = useAuth();
 
   return (
     <div className="space-y-4">
@@ -24,7 +23,7 @@ export default function InventoryClientPage() {
           </Button>
         </Link>
       </div>
-      <DataTable columns={columns({ deleteItem, userRole })} data={items} />
+      <DataTable columns={columns({ deleteItem, userRole: 'admin' })} data={items} />
     </div>
   );
 }

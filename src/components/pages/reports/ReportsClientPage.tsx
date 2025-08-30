@@ -1,8 +1,7 @@
+
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/hooks/useInventory';
@@ -14,24 +13,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import InventoryChart from './InventoryChart';
 
 export default function ReportsClientPage() {
-  const { userRole, loading: authLoading } = useAuth();
-  const router = useRouter();
   const { items } = useInventory();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [report, setReport] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!authLoading && userRole !== 'admin') {
-      toast({
-        variant: 'destructive',
-        title: 'Access Denied',
-        description: 'You do not have permission to view this page.',
-      });
-      router.replace('/dashboard');
-    }
-  }, [userRole, authLoading, router, toast]);
 
   const handleGenerateReport = () => {
     setError(null);
@@ -53,14 +39,6 @@ export default function ReportsClientPage() {
       }
     });
   };
-
-  if (authLoading || userRole !== 'admin') {
-    return (
-        <div className="flex items-center justify-center h-full">
-            <p>Loading or redirecting...</p>
-        </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
