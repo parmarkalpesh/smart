@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { PlusCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import DashboardStats from './DashboardStats';
 
 export default function InventoryClientPage() {
   const { items, deleteItem } = useInventory();
@@ -14,6 +15,7 @@ export default function InventoryClientPage() {
 
   return (
     <div className="space-y-4">
+      <DashboardStats items={items} />
       <div className="flex items-center justify-end">
         <Link href="/add" passHref>
           <Button>
