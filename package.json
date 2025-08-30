@@ -62,6 +62,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/html2canvas": "^1.0.0",
     "@types/jspdf": "^2.0.0",
     "@types/marked": "^6.0.0",
     "@types/node": "^20",
