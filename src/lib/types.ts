@@ -12,6 +12,7 @@ export interface InventoryItem {
   expiryDate?: string; // ISO string for expiry
   location?: string;
   supplier?: string;
+  nextMaintenanceDate?: string; // ISO string for maintenance
 }
 
 export interface GoogleUser {

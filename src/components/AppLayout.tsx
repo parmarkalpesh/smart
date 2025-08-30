@@ -41,13 +41,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    
     const expiringSoonItems = items.filter(item => {
         if (!item.expiryDate) return false;
         const expiryDate = new Date(item.expiryDate);
         return expiryDate > new Date() && expiryDate <= thirtyDaysFromNow;
     });
 
-    return lowStockItems.length + expiringSoonItems.length;
+    const maintenanceDueItems = items.filter(item => {
+        if (!item.nextMaintenanceDate) return false;
+        const maintenanceDate = new Date(item.nextMaintenanceDate);
+        return maintenanceDate > new Date() && maintenanceDate <= thirtyDaysFromNow;
+    });
+
+    return lowStockItems.length + expiringSoonItems.length + maintenanceDueItems.length;
   }, [items]);
 
 

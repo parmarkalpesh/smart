@@ -45,7 +45,13 @@ The report must be in markdown format and include the following sections:
 - Based on your forecast, create a markdown table with the columns: "Product Name", "Location", "Current Quantity", "Predicted Trend", and "Recommendation".
 - In the "Recommendation" column, suggest optimal stock levels and specific restocking actions (e.g., "Increase stock to 50 units," "Maintain current level," "Reorder 20 units before next month").
 
-**3. Waste Reduction Action Plan:**
+**3. Upcoming Maintenance Schedule:**
+- Identify any equipment with a 'nextMaintenanceDate' that is approaching (e.g., within the next 30 days).
+- Create a markdown table with columns: "Equipment Name", "Location", "Maintenance Due Date", and "Suggested Action".
+- In the "Suggested Action" column, recommend actions like "Schedule service with vendor" or "Perform internal check-up".
+- If no maintenance is due soon, state that.
+
+**4. Waste Reduction Action Plan:**
 - Identify items with an expiryDate that is approaching (e.g., within the next 30 days).
 - For these items, create a markdown table with columns: "Product Name", "Expires On", "Quantity Left", and "Suggested Action".
 - In the "Suggested Action" column, provide a creative and actionable promotional idea to sell the item before it expires (e.g., "Offer a 25% discount," "Bundle with 'Product Y'," "Create a 'Limited Time' flash sale"). Be specific.

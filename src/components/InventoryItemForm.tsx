@@ -42,6 +42,7 @@ const formSchema = z.object({
   expiryDate: z.date().optional(),
   location: z.string().optional(),
   supplier: z.string().optional(),
+  nextMaintenanceDate: z.date().optional(),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
@@ -67,6 +68,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
       expiryDate: item?.expiryDate ? new Date(item.expiryDate) : undefined,
       location: item?.location || '',
       supplier: item?.supplier || '',
+      nextMaintenanceDate: item?.nextMaintenanceDate ? new Date(item.nextMaintenanceDate) : undefined,
     },
   });
 
@@ -77,6 +79,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
     const itemData = {
       ...values,
       expiryDate: values.expiryDate?.toISOString(),
+      nextMaintenanceDate: values.nextMaintenanceDate?.toISOString(),
     };
 
     if (isEditMode && item) {
@@ -208,6 +211,47 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>Expiry Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="nextMaintenanceDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Next Maintenance Date</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>

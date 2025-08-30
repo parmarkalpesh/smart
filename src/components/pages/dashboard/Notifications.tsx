@@ -4,7 +4,7 @@
 import { useMemo } from 'react';
 import { InventoryItem } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Bell, TriangleAlert, CalendarClock } from 'lucide-react';
+import { Bell, TriangleAlert, CalendarClock, Wrench } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -20,36 +20,40 @@ export default function Notifications({ items }: NotificationsProps) {
     );
   }, [items]);
 
-  const expiringSoonItems = useMemo(() => {
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+  const thirtyDaysFromNow = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 30);
+    return date;
+  }, []);
 
+  const expiringSoonItems = useMemo(() => {
     return items.filter(item => {
         if (!item.expiryDate) return false;
         const expiryDate = new Date(item.expiryDate);
         return expiryDate > new Date() && expiryDate <= thirtyDaysFromNow;
     });
-  }, [items]);
+  }, [items, thirtyDaysFromNow]);
+  
+  const maintenanceDueItems = useMemo(() => {
+    return items.filter(item => {
+      if (!item.nextMaintenanceDate) return false;
+      const maintenanceDate = new Date(item.nextMaintenanceDate);
+      return maintenanceDate > new Date() && maintenanceDate <= thirtyDaysFromNow;
+    });
+  }, [items, thirtyDaysFromNow]);
 
-  if (lowStockItems.length === 0 && expiringSoonItems.length === 0) {
+  if (lowStockItems.length === 0 && expiringSoonItems.length === 0 && maintenanceDueItems.length === 0) {
     return null;
   }
 
   return (
-    <Card>
-        <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                Notifications
-            </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <div className="space-y-4">
         {lowStockItems.length > 0 && (
             <Alert variant="destructive">
             <TriangleAlert className="h-4 w-4" />
             <AlertTitle>Low Stock Alert</AlertTitle>
             <AlertDescription>
-                <ul className="list-disc list-inside mt-2">
+                <ul className="list-disc list-inside mt-2 space-y-2">
                 {lowStockItems.map(item => (
                     <li key={item.id} className="flex justify-between items-center">
                     <span>
@@ -70,7 +74,7 @@ export default function Notifications({ items }: NotificationsProps) {
                 <CalendarClock className="h-4 w-4" />
                 <AlertTitle>Expiry Alert</AlertTitle>
                 <AlertDescription>
-                    <ul className="list-disc list-inside mt-2">
+                    <ul className="list-disc list-inside mt-2 space-y-2">
                     {expiringSoonItems.map(item => (
                         <li key={item.id} className="flex justify-between items-center">
                         <span>
@@ -85,8 +89,28 @@ export default function Notifications({ items }: NotificationsProps) {
                 </AlertDescription>
             </Alert>
         )}
-        </CardContent>
-    </Card>
+
+        {maintenanceDueItems.length > 0 && (
+             <Alert>
+                <Wrench className="h-4 w-4" />
+                <AlertTitle>Maintenance Due</AlertTitle>
+                <AlertDescription>
+                    <ul className="list-disc list-inside mt-2 space-y-2">
+                    {maintenanceDueItems.map(item => (
+                        <li key={item.id} className="flex justify-between items-center">
+                        <span>
+                            {item.name} requires maintenance by {new Date(item.nextMaintenanceDate!).toLocaleDateString()}.
+                        </span>
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/item/${item.id}`}>View Item</Link>
+                        </Button>
+                        </li>
+                    ))}
+                    </ul>
+                </AlertDescription>
+            </Alert>
+        )}
+    </div>
 
   );
 }

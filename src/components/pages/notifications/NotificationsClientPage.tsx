@@ -10,25 +10,26 @@ import { Bell } from "lucide-react";
 export default function NotificationsClientPage() {
     const { items } = useInventory();
     
-    const lowStockItems = useMemo(() => {
-        return items.filter(
-          (item) => item.status === 'Low Stock' || (item.quantity > 0 && item.quantity <= 5)
-        );
-      }, [items]);
-    
-      const expiringSoonItems = useMemo(() => {
+    const hasNotifications = useMemo(() => {
+        const lowStock = items.some(item => item.status === 'Low Stock' || (item.quantity > 0 && item.quantity <= 5));
+        
         const thirtyDaysFromNow = new Date();
         thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-    
-        return items.filter(item => {
+
+        const expiringSoon = items.some(item => {
             if (!item.expiryDate) return false;
             const expiryDate = new Date(item.expiryDate);
             return expiryDate > new Date() && expiryDate <= thirtyDaysFromNow;
         });
-      }, [items]);
 
+        const maintenanceDue = items.some(item => {
+            if (!item.nextMaintenanceDate) return false;
+            const maintenanceDate = new Date(item.nextMaintenanceDate);
+            return maintenanceDate > new Date() && maintenanceDate <= thirtyDaysFromNow;
+        });
 
-    const hasNotifications = lowStockItems.length > 0 || expiringSoonItems.length > 0;
+        return lowStock || expiringSoon || maintenanceDue;
+    }, [items]);
 
     return (
         <Card>

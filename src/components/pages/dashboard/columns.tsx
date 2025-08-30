@@ -124,6 +124,15 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
       return <div>{new Date(date).toLocaleDateString()}</div>;
     },
   },
+   {
+    accessorKey: 'nextMaintenanceDate',
+    header: 'Next Maintenance',
+    cell: ({ row }) => {
+      const date = row.getValue('nextMaintenanceDate') as string | undefined;
+      if (!date) return 'N/A';
+      return <div>{new Date(date).toLocaleDateString()}</div>;
+    },
+  },
   {
     id: 'actions',
     cell: ({ row }) => {
