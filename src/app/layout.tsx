@@ -2,11 +2,14 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export const metadata: Metadata = {
   title: 'QRCode Inventory Ace',
   description: 'Inventory Management with QR Codes',
 };
+
+const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
 export default function RootLayout({
   children,
@@ -24,10 +27,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <AuthProvider>
-          {children}
-          <Toaster />
-        </AuthProvider>
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

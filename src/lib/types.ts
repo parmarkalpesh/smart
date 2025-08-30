@@ -9,3 +9,9 @@ export interface InventoryItem {
   quantity: number;
   imageUrl?: string;
 }
+
+export interface GoogleUser {
+    name: string;
+    email: string;
+    picture: string;
+}

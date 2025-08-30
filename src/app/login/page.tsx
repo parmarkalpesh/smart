@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,24 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { QrCode, User, Shield } from 'lucide-react';
+import { QrCode } from 'lucide-react';
+import { useGoogleLogin } from '@react-oauth/google';
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { handleGoogleLogin } = useAuth();
 
-  const handleLogin = (role: 'admin' | 'staff') => {
-    login(role);
-    setIsDialogOpen(false);
-  };
+  const login = useGoogleLogin({
+    onSuccess: handleGoogleLogin,
+    onError: (error) => console.error('Login Failed:', error),
+  });
 
   const GoogleIcon = () => (
     <svg className="mr-2 h-4 w-4" viewBox="0 0 48 48">
@@ -55,32 +46,10 @@ export default function LoginPage() {
           <CardDescription>Sign in with your Google account to continue.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="w-full">
-                <GoogleIcon />
-                Sign in with Google
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Choose an account</DialogTitle>
-                <DialogDescription>
-                  For demonstration purposes, please select a user role to log in as.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <Button variant="outline" onClick={() => handleLogin('admin')}>
-                  <Shield className="mr-2 h-4 w-4" />
-                  Log in as Admin
-                </Button>
-                <Button variant="outline" onClick={() => handleLogin('staff')}>
-                  <User className="mr-2 h-4 w-4" />
-                  Log in as Staff
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button className="w-full" onClick={() => login()}>
+            <GoogleIcon />
+            Sign in with Google
+          </Button>
         </CardContent>
       </Card>
     </main>

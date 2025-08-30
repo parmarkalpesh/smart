@@ -30,7 +30,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from './ui/separator';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading, userRole, logout } = useAuth();
+  const { isAuthenticated, loading, user, userRole, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -128,14 +128,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Separator className="my-2 bg-sidebar-border" />
            <div className="flex items-center gap-3 px-2 py-1">
               <Avatar className="h-9 w-9">
-                  <AvatarImage src={`https://i.pravatar.cc/40?u=${userRole}`} alt={userRole ?? ''} />
+                  <AvatarImage src={user?.picture} alt={user?.name ?? ''} />
                   <AvatarFallback>
                     <User />
                   </AvatarFallback>
               </Avatar>
               <div className="flex flex-col text-sm">
-                  <span className="font-semibold text-sidebar-foreground capitalize">{userRole}</span>
-                  <span className="text-xs text-sidebar-foreground/70">Logged In</span>
+                  <span className="font-semibold text-sidebar-foreground capitalize">{user?.name}</span>
+                  <span className="text-xs text-sidebar-foreground/70">{user?.email}</span>
               </div>
           </div>
           <Button variant="ghost" className="w-full justify-start gap-2" onClick={logout}>
