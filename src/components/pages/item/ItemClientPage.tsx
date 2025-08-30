@@ -14,7 +14,7 @@ import Image from 'next/image';
 import {ImageIcon, Fingerprint, MapPin, Building, Calendar, MessageSquare, Mic, Bot} from 'lucide-react';
 import VoiceNoteRecorder from './VoiceNoteRecorder';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import VoiceCommandRecorder from './VoiceCommandRecorder';
+import VoiceCommandInput from './VoiceCommandInput';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ItemClientPage({ itemId }: { itemId: string }) {
@@ -75,10 +75,10 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Bot /> Voice Command</CardTitle>
-                    <CardDescription>Update item details using a voice command. Try saying: "Change status to wasted" or "Update quantity to 25".</CardDescription>
+                    <CardDescription>Use your voice to dictate an update command. The transcribed text will appear below. You can then edit it before applying the update.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <VoiceCommandRecorder itemId={item.id} onUpdate={handleVoiceUpdate} />
+                    <VoiceCommandInput itemId={item.id} onUpdate={handleVoiceUpdate} />
                 </CardContent>
             </Card>
             <Card>

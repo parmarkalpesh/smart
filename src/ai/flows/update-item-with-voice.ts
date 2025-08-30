@@ -1,10 +1,10 @@
 
 'use server';
 /**
- * @fileOverview Updates an inventory item using a voice command.
+ * @fileOverview Updates an inventory item using a text command.
  *
  * - updateItemWithVoice - A function that handles the voice command processing.
- * - UpdateItemWithVoiceInput - The input type for the function.
+ * - UpdateItemWithTextInput - The input type for the function.
  * - UpdateItemWithVoiceOutput - The return type for the function.
  */
 
@@ -13,15 +13,11 @@ import {z} from 'genkit';
 import { ItemStatus } from '@/lib/types';
 
 // The input schema for the flow
-const UpdateItemWithVoiceInputSchema = z.object({
-  audioDataUri: z
-    .string()
-    .describe(
-      "An audio recording of a user command, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
-    ),
+const UpdateItemWithTextInputSchema = z.object({
+  command: z.string().describe('A text command from the user to update an inventory item.'),
   itemId: z.string().describe('The ID of the inventory item to update.'),
 });
-export type UpdateItemWithVoiceInput = z.infer<typeof UpdateItemWithVoiceInputSchema>;
+export type UpdateItemWithTextInput = z.infer<typeof UpdateItemWithTextInputSchema>;
 
 // The output schema defines the possible fields that can be updated.
 // It's a partial object, so only the fields mentioned in the voice command will be present.
@@ -37,7 +33,7 @@ export type UpdateItemWithVoiceOutput = z.infer<typeof UpdateItemWithVoiceOutput
 
 
 // The main exported function that the client will call.
-export async function updateItemWithVoice(input: UpdateItemWithVoiceInput): Promise<UpdateItemWithVoiceOutput> {
+export async function updateItemWithVoice(input: UpdateItemWithTextInput): Promise<UpdateItemWithVoiceOutput> {
   return updateItemWithVoiceFlow(input);
 }
 
@@ -46,7 +42,7 @@ export async function updateItemWithVoice(input: UpdateItemWithVoiceInput): Prom
 const itemUpdateTool = ai.defineTool(
     {
         name: 'updateInventoryItem',
-        description: 'Updates the fields of an inventory item based on the user\'s voice command. Only specify the fields that the user explicitly mentioned to change.',
+        description: 'Updates the fields of an inventory item based on the user\'s text command. Only specify the fields that the user explicitly mentioned to change.',
         inputSchema: UpdateItemWithVoiceOutputSchema,
         outputSchema: z.any(),
     },
@@ -59,17 +55,17 @@ const itemUpdateTool = ai.defineTool(
 
 const updatePrompt = ai.definePrompt(
     {
-        name: 'updateItemWithVoicePrompt',
+        name: 'updateItemWithTextPrompt',
         tools: [itemUpdateTool],
-        input: { schema: UpdateItemWithVoiceInputSchema },
+        input: { schema: UpdateItemWithTextInputSchema },
         prompt: `You are a voice assistant for an inventory management system.
-A user has provided a voice command to update an inventory item.
-Transcribe the audio and determine which fields to update.
+A user has provided a text command to update an inventory item.
+Analyze the text and determine which fields to update.
 Use the 'updateInventoryItem' tool to specify the new values.
 If the user's command is unclear or does not seem to relate to updating an inventory item,
 call the tool with an empty object.
 
-Audio command: {{media url=audioDataUri}}`,
+Text command: {{{command}}}`,
         config: {
             // Lower temperature for more deterministic, structured output
             temperature: 0.1,
@@ -82,7 +78,7 @@ Audio command: {{media url=audioDataUri}}`,
 const updateItemWithVoiceFlow = ai.defineFlow(
   {
     name: 'updateItemWithVoiceFlow',
-    inputSchema: UpdateItemWithVoiceInputSchema,
+    inputSchema: UpdateItemWithTextInputSchema,
     outputSchema: UpdateItemWithVoiceOutputSchema,
   },
   async (input) => {
