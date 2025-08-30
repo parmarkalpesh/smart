@@ -79,7 +79,7 @@ export default function ItemClientPage({ itemId }: { itemId: string }) {
             <Card>
                 <CardHeader>
                     <CardTitle>Item Details</CardTitle>
-                </Header>
+                </CardHeader>
                 <CardContent className="space-y-3 text-sm">
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">ID</span>
