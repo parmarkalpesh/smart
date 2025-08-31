@@ -33,16 +33,18 @@ const prompt = ai.definePrompt({
 
 You are provided with the current inventory data. Your task is to identify items that need to be reordered and generate purchase order proposals for each supplier.
 
-An item needs to be reordered if its 'quantity' is less than or equal to its 'reorderThreshold'. The quantity to order is defined by 'reorderQuantity', defaulting to 50 if not specified.
+An item needs to be reordered if its 'quantity' is less than or equal to its 'reorderThreshold'.
+You should also proactively identify high-demand items that might need reordering soon, even if they are slightly above the threshold but have a 'Low Stock' status.
+The quantity to order is defined by 'reorderQuantity', defaulting to 50 if not specified.
 
 **Instructions:**
 
-1.  **Analyze the inventory:** Iterate through the provided inventory data and identify all items that need to be reordered.
+1.  **Analyze the inventory:** Iterate through the provided inventory data and identify all items that need to be reordered based on the criteria above.
 2.  **Group by Supplier:** Group the items that need to be reordered by their 'supplier'. If a supplier is not listed, group it under "Unknown Supplier".
 3.  **Generate Purchase Orders:** For each supplier, create a separate purchase order proposal in markdown format. Each proposal should include:
     *   A clear heading with the supplier's name (e.g., "### Purchase Order for TechSupplier Inc.").
     *   The current date.
-    *   A markdown table with the columns: "Item Name", "Current Quantity", and "Reorder Quantity".
+    *   A markdown table with the columns: "Item Name", "Current Quantity", "Reorder Quantity", and "Reason". The reason should state if it's "Below Threshold" or "High Demand".
     *   A concluding line with a placeholder for a signature.
 4.  **Combine Proposals:** Combine all generated purchase order proposals into a single markdown string. Separate each section with a horizontal rule (\`---\`).
 5.  **Handle No Reorders:** If no items need reordering, the report should clearly state: "All inventory levels are sufficient. No purchase orders are needed at this time."

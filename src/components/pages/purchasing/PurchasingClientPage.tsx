@@ -65,7 +65,15 @@ export default function PurchasingClientPage() {
             backgroundColor: '#ffffff', // Force a white background for the PDF
             onclone: (document) => {
                 // Remove dark mode styles from the cloned element for PDF generation
-                document.getElementById(reportElement.id)?.classList.remove('dark:prose-invert');
+                const clonedElement = document.getElementById(reportElement.id);
+                if (clonedElement) {
+                  clonedElement.classList.remove('dark:prose-invert');
+                  // Ensure table text is visible on white background
+                   clonedElement.querySelectorAll('table, th, td').forEach(el => {
+                     (el as HTMLElement).style.color = '#000';
+                     (el as HTMLElement).style.borderColor = '#e5e7eb';
+                   });
+                }
             }
         });
         
@@ -80,24 +88,22 @@ export default function PurchasingClientPage() {
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
-        const canvasAspectRatio = canvasWidth / canvasHeight;
-        const pdfAspectRatio = pdfWidth / pdfHeight;
-
-        let finalWidth, finalHeight;
-
-        if (canvasAspectRatio > pdfAspectRatio) {
-            finalWidth = pdfWidth;
-            finalHeight = pdfWidth / canvasAspectRatio;
-        } else {
-            finalHeight = pdfHeight;
-            finalWidth = pdfHeight * canvasAspectRatio;
-        }
+        const imgAspectRatio = canvasWidth / canvasHeight;
         
-        // Center the image on the page
-        const x = (pdfWidth - finalWidth) / 2;
-        const y = 0; // Start from top
+        let finalWidth, finalHeight;
+        
+        // Fit image within the A4 page, maintaining aspect ratio
+        if (imgAspectRatio > pdfWidth / pdfHeight) {
+          finalWidth = pdfWidth;
+          finalHeight = finalWidth / imgAspectRatio;
+        } else {
+          finalHeight = pdfHeight;
+          finalWidth = finalHeight * imgAspectRatio;
+        }
 
-        pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
+        const x = (pdfWidth - finalWidth) / 2;
+        
+        pdf.addImage(imgData, 'PNG', x, 0, finalWidth, finalHeight);
         pdf.save(`purchase-orders-${new Date().toISOString().split('T')[0]}.pdf`);
 
     } catch (error) {
