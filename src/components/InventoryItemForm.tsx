@@ -28,7 +28,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import Image from 'next/image';
 import { Separator } from './ui/separator';
-import { cn } from '@/lib/utils';
 
 // Helper to format date for input[type="date"]
 const formatDateForInput = (date?: Date | string) => {
@@ -171,7 +170,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                     <FormItem>
                       <FormLabel>Expiry Date</FormLabel>
                       <FormControl>
-                        <Input type="date" {...field} className="w-[240px]" />
+                        <Input type="date" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -184,7 +183,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                     <FormItem>
                       <FormLabel>Next Maintenance Date</FormLabel>
                        <FormControl>
-                        <Input type="date" {...field} className="w-[240px]" />
+                        <Input type="date" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
