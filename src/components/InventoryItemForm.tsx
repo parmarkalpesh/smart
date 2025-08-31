@@ -27,12 +27,27 @@ import { InventoryItem, ItemStatus } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import Image from 'next/image';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon } from 'lucide-react';
-import { Calendar } from './ui/calendar';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 import { Separator } from './ui/separator';
+import { cn } from '@/lib/utils';
+
+// Helper to format date for input[type="date"]
+const formatDateForInput = (date?: Date | string) => {
+  if (!date) return '';
+  // If it's already a string in YYYY-MM-DD format, return it
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return date;
+  }
+  try {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = (d.getMonth() + 1).toString().padStart(2, '0');
+    const day = d.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  } catch {
+    return '';
+  }
+};
+
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -40,10 +55,10 @@ const formSchema = z.object({
   quantity: z.coerce.number().min(0, { message: 'Quantity cannot be negative.' }),
   status: z.enum(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted']),
   imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
-  expiryDate: z.date().optional(),
+  expiryDate: z.string().optional(),
   location: z.string().optional(),
   supplier: z.string().optional(),
-  nextMaintenanceDate: z.date().optional(),
+  nextMaintenanceDate: z.string().optional(),
   reorderThreshold: z.coerce.number().min(0).optional(),
   reorderQuantity: z.coerce.number().min(0).optional(),
   shelfId: z.string().optional(),
@@ -70,10 +85,10 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
       quantity: item?.quantity || 0,
       status: item?.status || 'Available',
       imageUrl: item?.imageUrl || '',
-      expiryDate: item?.expiryDate ? new Date(item.expiryDate) : undefined,
+      expiryDate: item?.expiryDate ? formatDateForInput(item.expiryDate) : '',
       location: item?.location || '',
       supplier: item?.supplier || '',
-      nextMaintenanceDate: item?.nextMaintenanceDate ? new Date(item.nextMaintenanceDate) : undefined,
+      nextMaintenanceDate: item?.nextMaintenanceDate ? formatDateForInput(item.nextMaintenanceDate) : '',
       reorderThreshold: item?.reorderThreshold || undefined,
       reorderQuantity: item?.reorderQuantity || undefined,
       shelfId: item?.shelfId || '',
@@ -87,8 +102,9 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
   function onSubmit(values: InventoryFormValues) {
     const itemData = {
       ...values,
-      expiryDate: values.expiryDate?.toISOString(),
-      nextMaintenanceDate: values.nextMaintenanceDate?.toISOString(),
+      // Ensure empty strings are not converted to invalid dates
+      expiryDate: values.expiryDate ? new Date(values.expiryDate).toISOString() : undefined,
+      nextMaintenanceDate: values.nextMaintenanceDate ? new Date(values.nextMaintenanceDate).toISOString() : undefined,
     };
 
     if (isEditMode && item) {
@@ -162,84 +178,28 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
         <div className="space-y-4">
             <h3 className="text-lg font-medium">Dates</h3>
             <div className="grid md:grid-cols-2 gap-4">
-                <FormField
+               <FormField
                   control={form.control}
                   name="expiryDate"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem>
                       <FormLabel>Expiry Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <FormControl>
+                        <Input type="date" {...field} className="w-[240px]" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <FormField
+               <FormField
                   control={form.control}
                   name="nextMaintenanceDate"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem>
                       <FormLabel>Next Maintenance Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                       <FormControl>
+                        <Input type="date" {...field} className="w-[240px]" />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
