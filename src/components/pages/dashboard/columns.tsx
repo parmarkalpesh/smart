@@ -12,8 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, ArrowUpDown, Trash2, Edit, MapPin } from 'lucide-react';
-import Link from 'next/link';
+import { MoreHorizontal, ArrowUpDown, Trash2, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
@@ -158,20 +157,16 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem asChild>
-                <Link href={`/item/${item.id}`}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  View/Edit Item
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
               {userRole === 'admin' && (
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
+                <>
+                  <DropdownMenuSeparator />
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

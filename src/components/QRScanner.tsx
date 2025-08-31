@@ -12,7 +12,6 @@ import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { Camera, TriangleAlert, Loader2, ImageIcon } from 'lucide-react';
-import Link from 'next/link';
 import { useInventory } from '@/hooks/useInventory';
 import { InventoryItem } from '@/lib/types';
 import Image from 'next/image';
@@ -147,9 +146,6 @@ export default function QRScanner() {
                  <Separator />
                  <div className="flex gap-2">
                     <Button onClick={resetScanner} variant="outline" className="w-full">Scan Another Item</Button>
-                    <Button asChild className="w-full">
-                        <Link href={`/item/${scannedItem.id}`}>View Full Details</Link>
-                    </Button>
                  </div>
             </CardContent>
         </Card>
