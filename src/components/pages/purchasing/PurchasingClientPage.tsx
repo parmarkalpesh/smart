@@ -2,7 +2,6 @@
 
 import { useState, useTransition, useRef, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/hooks/useInventory';
 import { generatePurchaseOrders } from '@/ai/flows/generate-purchase-orders';
 import { Wand2, FileText, TriangleAlert, Download, History, RefreshCw } from 'lucide-react';
@@ -10,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import html2canvas from 'html2canvas';
 import html2canvas from 'html2canvas';
 import { marked } from 'marked';
 import { jsPDF } from 'jspdf';
@@ -19,6 +19,21 @@ marked.setOptions({
   headerIds: false,
   mangle: false,
   breaks: true,
+  gfm: true,
+  sanitize: false, // deprecated, but set for clarity
+  smartLists: true,
+  smartypants: false,
+  xhtml: false,
+});
+// Remove all HTML tags from output by overriding renderer
+const renderer = new marked.Renderer();
+renderer.html = () => '';
+marked.use({ renderer });
+
+export default function PurchasingClientPage() {
+  const { items } = useInventory();
+  const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
   gfm: true,
   sanitize: false, // deprecated, but set for clarity
   smartLists: true,
@@ -114,14 +129,15 @@ export default function PurchasingClientPage() {
         } else {
           finalHeight = pdfHeight;
           finalWidth = finalHeight * imgAspectRatio;
-        }
+  };
+  
+  const reportHtml = useMemo(() => {
+    if (!report) return '';
+    // marked is now configured to never output HTML tags from user input
+    return marked(report) as string;
+  }, [report]);
 
-        const x = (pdfWidth - finalWidth) / 2;
-        
-        pdf.addImage(imgData, 'PNG', x, 0, finalWidth, finalHeight);
-        pdf.save(`purchase-orders-${new Date().toISOString().split('T')[0]}.pdf`);
 
-    } catch (error) {
         console.error("Failed to generate PDF", error);
         toast({
             variant: 'destructive',
