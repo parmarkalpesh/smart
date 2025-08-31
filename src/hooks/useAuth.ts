@@ -1,8 +1,6 @@
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import useLocalStorage from './useLocalStorage';
 import { useRouter } from 'next/navigation';
 
 type UserRole = 'admin' | 'staff';
@@ -12,7 +10,8 @@ interface AuthUser {
 }
 
 export function useAuth() {
-  const [user, setUser] = useLocalStorage<AuthUser | null>('auth-user', null);
+  // Remove localStorage and only allow login via server-issued user object
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -20,17 +19,16 @@ export function useAuth() {
     setLoading(false);
   }, [user]);
 
-  const login = useCallback(
-    (role: UserRole) => {
-      setUser({ role });
-    },
-    [setUser]
-  );
+  // login now requires a user object from a trusted server source
+  const login = useCallback((serverUser: AuthUser) => {
+    // Only accept user objects that come from a trusted server response
+    setUser(serverUser);
+  }, []);
 
   const logout = useCallback(() => {
     setUser(null);
     router.push('/login');
-  }, [setUser, router]);
+  }, [router]);
 
   return { user, login, logout, loading };
 }
