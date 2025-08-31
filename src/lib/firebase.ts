@@ -1,12 +1,12 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 
 const firebaseConfig = {
-    "projectId": "qrcode-inventory-ace",
-    "appId": "1:1073488652811:web:4305b190620530df55350e",
-    "storageBucket": "qrcode-inventory-ace.firebasestorage.app",
-    "apiKey": "AIzaSyCQzpWZbOSLHRDkOxGIHB_DItZpYWh_meQ",
-    "authDomain": "qrcode-inventory-ace.firebaseapp.com",
-    "messagingSenderId": "1073488652811"
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 };
 
 // Initialize Firebase
