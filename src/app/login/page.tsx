@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { QrCode, User, Shield } from 'lucide-react';
+import { QrCode, User } from 'lucide-react';
 import { useEffect } from 'react';
 
 export default function LoginPage() {
@@ -18,9 +18,9 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-
-  const handleLogin = (role: 'admin' | 'staff') => {
-    login(role);
+  // Only allow login as 'staff' (least privilege)
+  const handleLogin = () => {
+    login('staff');
     router.push('/dashboard');
   };
 
@@ -35,24 +35,16 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle>Welcome</CardTitle>
-          <CardDescription>Please select your role to log in.</CardDescription>
+          <CardDescription>Log in to continue.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
-            onClick={() => handleLogin('admin')}
-            className="w-full"
-            variant="default"
-          >
-            <Shield className="mr-2 h-4 w-4" />
-            Log in as Admin
-          </Button>
-          <Button
-            onClick={() => handleLogin('staff')}
+            onClick={handleLogin}
             className="w-full"
             variant="secondary"
           >
             <User className="mr-2 h-4 w-4" />
-            Log in as Staff
+            Log in
           </Button>
         </CardContent>
       </Card>
