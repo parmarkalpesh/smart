@@ -13,7 +13,7 @@ export interface VoiceNote {
 }
 
 export interface InventoryItem {
-  id: string;
+  id:string;
   name: string;
   type: string;
   dateAdded: string; // ISO string
@@ -27,6 +27,8 @@ export interface InventoryItem {
   voiceNotes?: VoiceNote[];
   reorderThreshold?: number;
   reorderQuantity?: number;
+  shelfId?: string; // For IoT integration
+  weight?: number; // For IoT integration (e.g. grams per unit)
 }
 
 export interface GoogleUser {

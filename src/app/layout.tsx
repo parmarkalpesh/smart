@@ -4,8 +4,8 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'QRCode Inventory Ace',
-  description: 'Inventory Management with QR Codes',
+  title: 'Predictive Inventory Intelligence',
+  description: 'Inventory system that not only tracks but predicts and visualizes your stock before issues arise.',
 };
 
 export default function RootLayout({

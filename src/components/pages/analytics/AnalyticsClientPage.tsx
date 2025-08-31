@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, useEffect } from 'react';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { useInventory } from '@/hooks/useInventory';
 import { generateAnalyticsInsights, GenerateAnalyticsInsightsOutput } from '@/ai/flows/generate-analytics-insights';
-import { Wand2, TriangleAlert, RefreshCw, BarChart2, TrendingDown, TrendingUp, AlertTriangle, PackageSearch, Hourglass } from 'lucide-react';
+import { Wand2, TriangleAlert, RefreshCw, BarChart2, TrendingDown, TrendingUp, AlertTriangle, PackageSearch, Hourglass, Wifi } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -145,7 +146,7 @@ export default function AnalyticsClientPage() {
                        ))}
                     </CardContent>
                 </Card>
-                <Card>
+                 <Card>
                     <CardHeader>
                         <CardTitle className='flex items-center gap-2'><Hourglass /> Reorder & Seasonal Trends</CardTitle>
                     </CardHeader>
@@ -167,6 +168,14 @@ export default function AnalyticsClientPage() {
                     </CardFooter>
                 </Card>
             </div>
+             <Card>
+                <CardHeader>
+                    <CardTitle className='flex items-center gap-2'><Wifi /> IoT Shelf Insights</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">{insights.iotShelfInsights}</p>
+                </CardContent>
+            </Card>
         </div>
       )}
     </div>
@@ -231,6 +240,14 @@ function AnalyticsSkeleton() {
                     </CardContent>
                 </Card>
             </div>
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-7 w-1/3" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
         </div>
     )
 }

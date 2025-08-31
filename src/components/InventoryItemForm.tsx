@@ -32,6 +32,7 @@ import { CalendarIcon } from 'lucide-react';
 import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { Separator } from './ui/separator';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -45,6 +46,8 @@ const formSchema = z.object({
   nextMaintenanceDate: z.date().optional(),
   reorderThreshold: z.coerce.number().min(0).optional(),
   reorderQuantity: z.coerce.number().min(0).optional(),
+  shelfId: z.string().optional(),
+  weight: z.coerce.number().min(0).optional(),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
@@ -73,6 +76,8 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
       nextMaintenanceDate: item?.nextMaintenanceDate ? new Date(item.nextMaintenanceDate) : undefined,
       reorderThreshold: item?.reorderThreshold || undefined,
       reorderQuantity: item?.reorderQuantity || undefined,
+      shelfId: item?.shelfId || '',
+      weight: item?.weight || undefined,
     },
   });
 
@@ -118,208 +123,52 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid md:grid-cols-2 gap-8">
-            <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Item Name</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g. MacBook Pro 16-inch" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Item Type</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g. Electronics" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="quantity"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Quantity</FormLabel>
-                <FormControl>
-                    <Input type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select a status" />
-                    </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                    {(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted'] as ItemStatus[]).map(
-                        (status) => (
-                        <SelectItem key={status} value={status}>
-                            {status}
-                        </SelectItem>
-                        )
-                    )}
-                    </SelectContent>
-                </Select>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Location</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g. Warehouse A, Shelf 3" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="supplier"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Supplier</FormLabel>
-                <FormControl>
-                    <Input placeholder="e.g. Supplier Inc." {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-                control={form.control}
-                name="expiryDate"
-                render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                    <FormLabel>Expiry Date</FormLabel>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                        <FormControl>
-                            <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                            )}
-                            >
-                            {field.value ? (
-                                format(field.value, "PPP")
-                            ) : (
-                                <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                        </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                            date < new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                        />
-                        </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            <FormField
-                control={form.control}
-                name="nextMaintenanceDate"
-                render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                    <FormLabel>Next Maintenance Date</FormLabel>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                        <FormControl>
-                            <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                            )}
-                            >
-                            {field.value ? (
-                                format(field.value, "PPP")
-                            ) : (
-                                <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                        </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                            date < new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                        />
-                        </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            <FormField
-                control={form.control}
-                name="reorderThreshold"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Reorder Threshold</FormLabel>
-                    <FormControl>
-                        <Input type="number" placeholder="e.g. 10" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            <FormField
-            control={form.control}
-            name="reorderQuantity"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Reorder Quantity</FormLabel>
-                <FormControl>
-                    <Input type="number" placeholder="e.g. 50" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        
+        <div className="space-y-4">
+            <h3 className="text-lg font-medium">Main Details</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="name" render={({ field }) => ( <FormItem> <FormLabel>Item Name</FormLabel> <FormControl> <Input placeholder="e.g. MacBook Pro 16-inch" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="type" render={({ field }) => ( <FormItem> <FormLabel>Item Type</FormLabel> <FormControl> <Input placeholder="e.g. Electronics" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="quantity" render={({ field }) => ( <FormItem> <FormLabel>Quantity</FormLabel> <FormControl> <Input type="number" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="status" render={({ field }) => ( <FormItem> <FormLabel>Status</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Select a status" /> </SelectTrigger> </FormControl> <SelectContent> {(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted'] as ItemStatus[]).map( (status) => ( <SelectItem key={status} value={status}> {status} </SelectItem> ) )} </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="location" render={({ field }) => ( <FormItem> <FormLabel>Location</FormLabel> <FormControl> <Input placeholder="e.g. Warehouse A, Shelf 3" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="supplier" render={({ field }) => ( <FormItem> <FormLabel>Supplier</FormLabel> <FormControl> <Input placeholder="e.g. Supplier Inc." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+            </div>
         </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+            <h3 className="text-lg font-medium">IoT & Sensor Data (Simulation)</h3>
+             <div className="grid md:grid-cols-2 gap-4">
+                 <FormField control={form.control} name="shelfId" render={({ field }) => ( <FormItem> <FormLabel>Shelf ID</FormLabel> <FormControl> <Input placeholder="e.g. SH-01-A" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                 <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem> <FormLabel>Weight per Unit (grams)</FormLabel> <FormControl> <Input type="number" placeholder="e.g. 1800" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+            </div>
+        </div>
+
+        <Separator />
+        
+        <div className="space-y-4">
+            <h3 className="text-lg font-medium">Purchasing Details</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="reorderThreshold" render={({ field }) => ( <FormItem> <FormLabel>Reorder Threshold</FormLabel> <FormControl> <Input type="number" placeholder="e.g. 10" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="reorderQuantity" render={({ field }) => ( <FormItem> <FormLabel>Reorder Quantity</FormLabel> <FormControl> <Input type="number" placeholder="e.g. 50" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+            </div>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+            <h3 className="text-lg font-medium">Dates</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="expiryDate" render={({ field }) => ( <FormItem className="flex flex-col"> <FormLabel>Expiry Date</FormLabel> <Popover> <PopoverTrigger asChild> <FormControl> <Button variant={"outline"} className={cn( "w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground" )}> {field.value ? ( format(field.value, "PPP") ) : ( <span>Pick a date</span> )} <CalendarIcon className="ml-auto h-4 w-4 opacity-50" /> </Button> </FormControl> </PopoverTrigger> <PopoverContent className="w-auto p-0" align="start"> <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date() || date < new Date("1900-01-01")} initialFocus /> </PopoverContent> </Popover> <FormMessage /> </FormItem> )}/>
+                <FormField control={form.control} name="nextMaintenanceDate" render={({ field }) => ( <FormItem className="flex flex-col"> <FormLabel>Next Maintenance Date</FormLabel> <Popover> <PopoverTrigger asChild> <FormControl> <Button variant={"outline"} className={cn( "w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground" )}> {field.value ? ( format(field.value, "PPP") ) : ( <span>Pick a date</span> )} <CalendarIcon className="ml-auto h-4 w-4 opacity-50" /> </Button> </FormControl> </PopoverTrigger> <PopoverContent className="w-auto p-0" align="start"> <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date() || date < new Date("1900-01-01")} initialFocus /> </PopoverContent> </Popover> <FormMessage /> </FormItem> )}/>
+            </div>
+        </div>
+
+        <Separator />
+
          <FormField
           control={form.control}
           name="imageUrl"
