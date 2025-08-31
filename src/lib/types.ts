@@ -1,6 +1,8 @@
 
 
 export type ItemStatus = 'Available' | 'Checked Out' | 'In Maintenance' | 'Low Stock' | 'Wasted';
+export type DeliveryStatus = 'Ordered' | 'Shipped' | 'Delayed' | 'Delivered' | 'Pending';
+
 
 export interface VoiceNote {
   id: string;
@@ -25,6 +27,9 @@ export interface InventoryItem {
   voiceNotes?: VoiceNote[];
   reorderThreshold?: number;
   reorderQuantity?: number;
+  deliveryStatus?: DeliveryStatus;
+  expectedDeliveryDate?: string; // ISO string
+  alternativeSuppliers?: string[];
 }
 
 export interface GoogleUser {

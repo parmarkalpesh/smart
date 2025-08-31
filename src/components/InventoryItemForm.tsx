@@ -23,12 +23,12 @@ import {
 } from '@/components/ui/select';
 import { useInventory } from '@/hooks/useInventory';
 import { useRouter } from 'next/navigation';
-import { InventoryItem, ItemStatus } from '@/lib/types';
+import { InventoryItem, ItemStatus, DeliveryStatus } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import Image from 'next/image';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, PlusCircle, Trash2 } from 'lucide-react';
 import { Calendar } from './ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -45,6 +45,9 @@ const formSchema = z.object({
   nextMaintenanceDate: z.date().optional(),
   reorderThreshold: z.coerce.number().min(0).optional(),
   reorderQuantity: z.coerce.number().min(0).optional(),
+  deliveryStatus: z.enum(['Ordered', 'Shipped', 'Delayed', 'Delivered', 'Pending']).optional(),
+  expectedDeliveryDate: z.date().optional(),
+  alternativeSuppliers: z.array(z.string()).optional(),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
@@ -73,17 +76,22 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
       nextMaintenanceDate: item?.nextMaintenanceDate ? new Date(item.nextMaintenanceDate) : undefined,
       reorderThreshold: item?.reorderThreshold || undefined,
       reorderQuantity: item?.reorderQuantity || undefined,
+      deliveryStatus: item?.deliveryStatus || 'Pending',
+      expectedDeliveryDate: item?.expectedDeliveryDate ? new Date(item.expectedDeliveryDate) : undefined,
+      alternativeSuppliers: item?.alternativeSuppliers || [],
     },
   });
 
   const [imagePreview, setImagePreview] = useState<string | undefined>(item?.imageUrl);
   const [isImageValid, setIsImageValid] = useState(true);
+  const [newSupplier, setNewSupplier] = useState('');
 
   function onSubmit(values: InventoryFormValues) {
     const itemData = {
       ...values,
       expiryDate: values.expiryDate?.toISOString(),
       nextMaintenanceDate: values.nextMaintenanceDate?.toISOString(),
+      expectedDeliveryDate: values.expectedDeliveryDate?.toISOString(),
     };
 
     if (isEditMode && item) {
@@ -114,6 +122,20 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
         setIsImageValid(false);
     }
   };
+
+  const handleAddSupplier = () => {
+    if (newSupplier.trim()) {
+      const currentSuppliers = form.getValues('alternativeSuppliers') || [];
+      form.setValue('alternativeSuppliers', [...currentSuppliers, newSupplier.trim()]);
+      setNewSupplier('');
+    }
+  };
+
+  const handleRemoveSupplier = (supplierToRemove: string) => {
+    const currentSuppliers = form.getValues('alternativeSuppliers') || [];
+    form.setValue('alternativeSuppliers', currentSuppliers.filter(s => s !== supplierToRemove));
+  };
+
 
   return (
     <Form {...form}>
@@ -202,7 +224,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
             name="supplier"
             render={({ field }) => (
                 <FormItem>
-                <FormLabel>Supplier</FormLabel>
+                <FormLabel>Primary Supplier</FormLabel>
                 <FormControl>
                     <Input placeholder="e.g. Supplier Inc." {...field} />
                 </FormControl>
@@ -238,7 +260,116 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
             />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-4 pt-4 border-t">
+            <h3 className="text-lg font-medium">Delivery & Supplier Details</h3>
+             <div className="grid md:grid-cols-2 gap-8">
+                 <FormField
+                    control={form.control}
+                    name="deliveryStatus"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Delivery Status</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a delivery status" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            {(['Pending', 'Ordered', 'Shipped', 'Delayed', 'Delivered'] as DeliveryStatus[]).map(
+                                (status) => (
+                                <SelectItem key={status} value={status}>
+                                    {status}
+                                </SelectItem>
+                                )
+                            )}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                 <FormField
+                    control={form.control}
+                    name="expectedDeliveryDate"
+                    render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                        <FormLabel>Expected Delivery Date</FormLabel>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                            <FormControl>
+                                <Button
+                                variant={"outline"}
+                                className={cn(
+                                    "w-[240px] pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                )}
+                                >
+                                {field.value ? (
+                                    format(field.value, "PPP")
+                                ) : (
+                                    <span>Pick a date</span>
+                                )}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                            <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                initialFocus
+                            />
+                            </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+             </div>
+             <FormField
+                control={form.control}
+                name="alternativeSuppliers"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Alternative Suppliers</FormLabel>
+                        <div className="space-y-2">
+                             {field.value?.map((supplier, index) => (
+                                <div key={index} className="flex items-center gap-2">
+                                    <Input value={supplier} readOnly className="bg-muted" />
+                                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveSupplier(supplier)}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex items-center gap-2 pt-2">
+                             <FormControl>
+                               <Input 
+                                placeholder="Add an alternative supplier"
+                                value={newSupplier}
+                                onChange={(e) => setNewSupplier(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if(e.key === 'Enter') {
+                                        e.preventDefault();
+                                        handleAddSupplier();
+                                    }
+                                }}
+                               />
+                            </FormControl>
+                            <Button type="button" variant="outline" size="icon" onClick={handleAddSupplier}>
+                                <PlusCircle className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <FormMessage />
+                    </FormItem>
+                )}
+                />
+        </div>
+
+
+        <div className="grid md:grid-cols-2 gap-8 pt-4 border-t">
             <FormField
             control={form.control}
             name="expiryDate"
