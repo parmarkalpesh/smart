@@ -145,7 +145,8 @@ export default function QRScanner() {
                 </div>
                  <Separator />
                  <div className="flex gap-2">
-                    <Button onClick={resetScanner} variant="outline" className="w-full">Scan Another Item</Button>
+                    <Button onClick={() => router.push(`/item/${scannedItem.id}`)} className="w-full">View Full Details</Button>
+                    <Button onClick={resetScanner} variant="outline" className="w-full">Scan Another</Button>
                  </div>
             </CardContent>
         </Card>

@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, ArrowUpDown, Trash2, MapPin } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Trash2, MapPin, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
@@ -27,6 +27,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 type ColumnsProps = {
   deleteItem: (id: string) => void;
@@ -137,6 +139,7 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
     cell: ({ row }) => {
       const item = row.original;
       const { toast } = useToast();
+      const router = useRouter();
 
       const handleDelete = () => {
         deleteItem(item.id);
@@ -157,6 +160,10 @@ export const columns = ({ deleteItem, userRole }: ColumnsProps): ColumnDef<Inven
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => router.push(`/item/${item.id}`)}>
+                <Eye className="mr-2 h-4 w-4" />
+                View / Edit
+              </DropdownMenuItem>
               {userRole === 'admin' && (
                 <>
                   <DropdownMenuSeparator />

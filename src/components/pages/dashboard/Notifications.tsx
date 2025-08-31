@@ -59,6 +59,9 @@ export default function Notifications({ items }: NotificationsProps) {
                     <span>
                         {item.name} has only {item.quantity} unit(s) left.
                     </span>
+                     <Button asChild variant="secondary" size="sm">
+                        <Link href={`/item/${item.id}`}>View Item</Link>
+                    </Button>
                     </li>
                 ))}
                 </ul>
@@ -77,6 +80,9 @@ export default function Notifications({ items }: NotificationsProps) {
                         <span>
                             {item.name} will expire on {new Date(item.expiryDate!).toLocaleDateString()}.
                         </span>
+                         <Button asChild variant="secondary" size="sm">
+                            <Link href={`/item/${item.id}`}>View Item</Link>
+                        </Button>
                         </li>
                     ))}
                     </ul>
@@ -95,6 +101,9 @@ export default function Notifications({ items }: NotificationsProps) {
                         <span>
                             {item.name} requires maintenance by {new Date(item.nextMaintenanceDate!).toLocaleDateString()}.
                         </span>
+                        <Button asChild variant="secondary" size="sm">
+                            <Link href={`/item/${item.id}`}>View Item</Link>
+                        </Button>
                         </li>
                     ))}
                     </ul>

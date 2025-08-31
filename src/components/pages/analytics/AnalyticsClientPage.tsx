@@ -168,14 +168,7 @@ export default function AnalyticsClientPage() {
                     </CardFooter>
                 </Card>
             </div>
-             <Card>
-                <CardHeader>
-                    <CardTitle className='flex items-center gap-2'><Wifi /> IoT Shelf Insights</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">{insights.iotShelfInsights}</p>
-                </CardContent>
-            </Card>
+           
         </div>
       )}
     </div>
