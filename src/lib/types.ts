@@ -27,8 +27,6 @@ export interface InventoryItem {
   voiceNotes?: VoiceNote[];
   reorderThreshold?: number;
   reorderQuantity?: number;
-  shelfId?: string; // For IoT integration
-  weight?: number; // For IoT integration (e.g. grams per unit)
 }
 
 export interface GoogleUser {

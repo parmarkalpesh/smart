@@ -61,8 +61,6 @@ const formSchema = z.object({
   nextMaintenanceDate: z.string().optional(),
   reorderThreshold: z.coerce.number().min(0).optional(),
   reorderQuantity: z.coerce.number().min(0).optional(),
-  shelfId: z.string().optional(),
-  weight: z.coerce.number().min(0).optional(),
 });
 
 type InventoryFormValues = z.infer<typeof formSchema>;
@@ -91,8 +89,6 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
       nextMaintenanceDate: item?.nextMaintenanceDate ? formatDateForInput(item.nextMaintenanceDate) : '',
       reorderThreshold: item?.reorderThreshold || undefined,
       reorderQuantity: item?.reorderQuantity || undefined,
-      shelfId: item?.shelfId || '',
-      weight: item?.weight || undefined,
     },
   });
 
@@ -150,16 +146,6 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                 <FormField control={form.control} name="status" render={({ field }) => ( <FormItem> <FormLabel>Status</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl> <SelectTrigger> <SelectValue placeholder="Select a status" /> </SelectTrigger> </FormControl> <SelectContent> {(['Available', 'Checked Out', 'In Maintenance', 'Low Stock', 'Wasted'] as ItemStatus[]).map( (status) => ( <SelectItem key={status} value={status}> {status} </SelectItem> ) )} </SelectContent> </Select> <FormMessage /> </FormItem> )}/>
                 <FormField control={form.control} name="location" render={({ field }) => ( <FormItem> <FormLabel>Location</FormLabel> <FormControl> <Input placeholder="e.g. Warehouse A, Shelf 3" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
                 <FormField control={form.control} name="supplier" render={({ field }) => ( <FormItem> <FormLabel>Supplier</FormLabel> <FormControl> <Input placeholder="e.g. Supplier Inc." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-            </div>
-        </div>
-
-        <Separator />
-
-        <div className="space-y-4">
-            <h3 className="text-lg font-medium">IoT & Sensor Data (Simulation)</h3>
-             <div className="grid md:grid-cols-2 gap-4">
-                 <FormField control={form.control} name="shelfId" render={({ field }) => ( <FormItem> <FormLabel>Shelf ID</FormLabel> <FormControl> <Input placeholder="e.g. SH-01-A" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
-                 <FormField control={form.control} name="weight" render={({ field }) => ( <FormItem> <FormLabel>Weight per Unit (grams)</FormLabel> <FormControl> <Input type="number" placeholder="e.g. 1800" {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
             </div>
         </div>
 

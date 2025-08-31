@@ -4,8 +4,8 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Predictive Inventory Intelligence',
-  description: 'Inventory system that not only tracks but predicts and visualizes your stock before issues arise.',
+  title: 'Inventory Ace',
+  description: 'A smart inventory management system.',
 };
 
 export default function RootLayout({

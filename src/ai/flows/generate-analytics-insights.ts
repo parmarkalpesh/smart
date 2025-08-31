@@ -12,7 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateAnalyticsInsightsInputSchema = z.object({
-  inventoryData: z.string().describe('JSON string of the current inventory data. Array of objects with fields like name, quantity, reorderThreshold, dateAdded, weight, etc.'),
+  inventoryData: z.string().describe('JSON string of the current inventory data. Array of objects with fields like name, quantity, reorderThreshold, dateAdded, etc.'),
 });
 export type GenerateAnalyticsInsightsInput = z.infer<typeof GenerateAnalyticsInsightsInputSchema>;
 
@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
   name: 'generateAnalyticsInsightsPrompt',
   input: {schema: GenerateAnalyticsInsightsInputSchema},
   output: {schema: GenerateAnalyticsInsightsOutputSchema},
-  prompt: `You are an expert AI in supply chain management and data analytics with IoT integration.
+  prompt: `You are an expert AI in supply chain management and data analytics.
 
 You are provided with the current inventory data. Your task is to analyze this data and generate a report with predictive KPIs and insights.
 
@@ -52,7 +52,7 @@ You are provided with the current inventory data. Your task is to analyze this d
 4.  **Identify Top-Selling / Fast-Moving Items:** Based on check-out velocity (which you'll have to infer from status changes or assume based on low stock levels for this exercise), identify the top 3-5 fastest-moving items. Provide a brief insight for each. For this task, assume items with "Low Stock" or low quantity are fast-moving.
 5.  **Identify Slow-Moving Stock:** Identify the top 3-5 slowest-moving items. Assume items with high quantity and 'Available' status that haven't been updated recently are slow-moving. Provide a brief insight for each.
 6.  **Analyze Seasonal Trends:** Provide a paragraph on potential seasonal trends. Since you don't have historical data, make educated guesses based on item types (e.g., "Office supplies might see a dip during holiday seasons").
-7.  **Analyze IoT Shelf Data**: The data may contain 'shelfId' and 'weight' for items. If this data is present, provide a summary of any interesting findings. For example, "Shelf SH-01 seems to hold high-turnover items like electronics and accessories." or "Weight data seems consistent with reported quantities." If no IoT data is present, state that.
+7.  **IoT Shelf Insights**: State that no IoT data is available for analysis.
 
 Generate a full JSON output based on these instructions. Be insightful and concise.
 `,
