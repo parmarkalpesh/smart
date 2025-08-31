@@ -2,7 +2,6 @@
 /**
  * @fileOverview Generates purchase order proposals for items below their reorder threshold.
  *
- * - generatePurchaseOrders - A function that generates the purchase orders.
  * - GeneratePurchaseOrdersInput - The input type for the function.
  * - GeneratePurchaseOrdersOutput - The return type for the function.
  */
@@ -16,6 +15,7 @@ const GeneratePurchaseOrdersInputSchema = z.object({
 export type GeneratePurchaseOrdersInput = z.infer<typeof GeneratePurchaseOrdersInputSchema>;
 
 const GeneratePurchaseOrdersOutputSchema = z.object({
+  report: z.string().describe('A detailed report in markdown format containing purchase order proposals for each supplier.'),
   report: z.string().describe('A detailed report in markdown format containing purchase order proposals for each supplier.'),
 });
 export type GeneratePurchaseOrdersOutput = z.infer<typeof GeneratePurchaseOrdersOutputSchema>;
@@ -50,6 +50,42 @@ function sanitizeInventoryData(input: string): string {
   } catch {
     return '[]';
   }
+}
+
+export async function generatePurchaseOrders(input: GeneratePurchaseOrdersInput): Promise<GeneratePurchaseOrdersOutput> {
+  // Sanitize inventoryData before passing to the flow
+  const sanitizedInput = {
+    ...input,
+    inventoryData: sanitizeInventoryData(input.inventoryData),
+  };
+  return generatePurchaseOrdersFlow(sanitizedInput);
+}
+
+const prompt = ai.definePrompt({
+  name: 'generatePurchaseOrdersPrompt',
+      return '[]';
+    }
+    // Only allow expected fields and escape dangerous characters in string fields
+    const allowedFields = ['name', 'quantity', 'reorderThreshold', 'reorderQuantity', 'supplier'];
+    const escape = (str: string) =>
+      str.replace(/[{}\\`$<>|]/g, c => ({'{': '\\{', '}': '\\}', '`': '\\`', '$': '\\$', '<': '&lt;', '>': '&gt;', '|': '\\|', '\\': '\\\\'}[c] || c));
+    const sanitized = parsed.map((item: any) => {
+      const clean: any = {};
+      for (const key of allowedFields) {
+        if (Object.prototype.hasOwnProperty.call(item, key)) {
+          if (typeof item[key] === 'string') {
+            clean[key] = escape(item[key]);
+          } else {
+            clean[key] = item[key];
+    *   A clear heading with the supplier's name (e.g., "### Purchase Order for TechSupplier Inc.").
+    *   The current date.
+    *   A markdown table with the columns: "Item Name", "Current Quantity", and "Reorder Quantity".
+    *   A concluding line with a placeholder for a signature.
+4.  **Combine Proposals:** Combine all generated purchase order proposals into a single markdown string. Separate each section with a horizontal rule (`---`).
+5.  **Handle No Reorders:** If no items need reordering, the report should clearly state: "All inventory levels are sufficient. No purchase orders are needed at this time."
+
+Inventory Data: {{{inventoryData}}}
+
 }
 
 export async function generatePurchaseOrders(input: GeneratePurchaseOrdersInput): Promise<GeneratePurchaseOrdersOutput> {
