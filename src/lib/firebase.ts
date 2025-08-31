@@ -4,7 +4,7 @@ const firebaseConfig = {
     "projectId": "qrcode-inventory-ace",
     "appId": "1:1073488652811:web:4305b190620530df55350e",
     "storageBucket": "qrcode-inventory-ace.firebasestorage.app",
-    "apiKey": process.env.FIREBASE_API_KEY,
+    "apiKey": process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     "authDomain": "qrcode-inventory-ace.firebaseapp.com",
     "messagingSenderId": "1073488652811"
 };
