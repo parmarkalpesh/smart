@@ -35,9 +35,11 @@ You are provided with the current inventory data. Your task is to identify items
 
 An item needs to be reordered if its 'quantity' is less than or equal to its 'reorderThreshold'. The quantity to order is defined by 'reorderQuantity', defaulting to 50 if not specified.
 
+Also, proactively identify items that are in high demand. For this analysis, consider items with low stock quantities that are marked as 'Available' or 'Low Stock' as being in high demand, and suggest reordering them even if they are slightly above their reorder threshold.
+
 **Instructions:**
 
-1.  **Analyze the inventory:** Iterate through the provided inventory data and identify all items that need to be reordered.
+1.  **Analyze the inventory:** Iterate through the provided inventory data and identify all items that need to be reordered, including those that are proactively identified as high-demand.
 2.  **Group by Supplier:** Group the items that need to be reordered by their 'supplier'. If a supplier is not listed, group it under "Unknown Supplier".
 3.  **Generate Purchase Orders:** For each supplier, create a separate purchase order proposal in markdown format. Each proposal should include:
     *   A clear heading with the supplier's name (e.g., "### Purchase Order for TechSupplier Inc.").
