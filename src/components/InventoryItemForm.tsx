@@ -169,8 +169,8 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                     <FormItem className="flex flex-col">
                       <FormLabel>Expiry Date</FormLabel>
                       <Popover>
-                        <FormControl>
-                          <PopoverTrigger asChild>
+                        <PopoverTrigger asChild>
+                           <FormControl>
                             <Button
                               variant={"outline"}
                               className={cn(
@@ -185,8 +185,8 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                               )}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
-                          </PopoverTrigger>
-                        </FormControl>
+                          </FormControl>
+                        </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
@@ -209,9 +209,9 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Next Maintenance Date</FormLabel>
-                      <Popover>
-                        <FormControl>
-                          <PopoverTrigger asChild>
+                       <Popover>
+                        <PopoverTrigger asChild>
+                           <FormControl>
                             <Button
                               variant={"outline"}
                               className={cn(
@@ -226,8 +226,8 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                               )}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
-                          </PopoverTrigger>
-                        </FormControl>
+                          </FormControl>
+                        </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
@@ -282,5 +282,3 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
     </Form>
   );
 }
-
-    
