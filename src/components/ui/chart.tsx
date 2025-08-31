@@ -67,6 +67,13 @@ const ChartContainer = React.forwardRef<
 })
 ChartContainer.displayName = "Chart"
 
+// Sanitize CSS value to prevent injection
+function sanitizeCssValue(value: string): string {
+  // Remove any character except alphanumerics, #, (, ), ., ,, %, -, _, space
+  // This is a conservative filter for color values and simple CSS values
+  return value.replace(/[^a-zA-Z0-9#(),.%\-_\s]/g, "").trim()
+}
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color
@@ -85,11 +92,15 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
-    const color =
+    let color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    if (typeof color === "string") {
+      color = sanitizeCssValue(color)
+    }
+    return color ? `  --color-${sanitizeCssValue(key)}: ${color};` : null
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `
