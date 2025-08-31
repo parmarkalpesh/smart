@@ -1,13 +1,17 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 
-const requiredVars = [
-  'FIREBASE_PROJECT_ID',
-  'FIREBASE_APP_ID',
-  'FIREBASE_STORAGE_BUCKET',
-  'FIREBASE_API_KEY',
-  'FIREBASE_AUTH_DOMAIN',
-  'FIREBASE_MESSAGING_SENDER_ID'
-];
+if (!process.env.FIREBASE_API_KEY) {
+    throw new Error('FIREBASE_API_KEY environment variable is not set');
+}
+
+const firebaseConfig = {
+    "projectId": "qrcode-inventory-ace",
+    "appId": "1:1073488652811:web:4305b190620530df55350e",
+    "storageBucket": "qrcode-inventory-ace.firebasestorage.app",
+    "apiKey": process.env.FIREBASE_API_KEY,
+    "authDomain": "qrcode-inventory-ace.firebaseapp.com",
+    "messagingSenderId": "1073488652811"
+};
 
 for (const v of requiredVars) {
   if (!process.env[v]) {
