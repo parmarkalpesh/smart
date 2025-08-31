@@ -170,7 +170,7 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                       <FormLabel>Expiry Date</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
-                           <FormControl>
+                          <FormControl>
                             <Button
                               variant={"outline"}
                               className={cn(
@@ -209,9 +209,9 @@ export default function InventoryItemForm({ item }: InventoryItemFormProps) {
                   render={({ field }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Next Maintenance Date</FormLabel>
-                       <Popover>
+                      <Popover>
                         <PopoverTrigger asChild>
-                           <FormControl>
+                          <FormControl>
                             <Button
                               variant={"outline"}
                               className={cn(
