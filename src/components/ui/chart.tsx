@@ -78,22 +78,33 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
     ([, config]) => config.theme || config.color
   )
+  return value.replace(/[^a-zA-Z0-9#(),.%\-_\s]/g, "").trim()
+}
+
+const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+  const colorConfig = Object.entries(config).filter(
+    ([, config]) => config.theme || config.color
+  )
 
   if (!colorConfig.length) {
     return null
-  }
-
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
             ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     let color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+      itemConfig.color
+    if (typeof color === "string") {
+      color = sanitizeCssValue(color)
+    }
+    return color ? `  --color-${sanitizeCssValue(key)}: ${color};` : null
+  })
+  .filter(Boolean)
+  .join("\n")}
+}
+`
+          )
       itemConfig.color
     if (typeof color === "string") {
       color = sanitizeCssValue(color)
