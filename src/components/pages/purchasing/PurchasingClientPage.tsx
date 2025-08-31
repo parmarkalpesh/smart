@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useTransition, useRef, useMemo } from 'react';
+import { useState, useTransition, useRef, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/hooks/useInventory';
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import html2canvas from 'html2canvas';
 import { marked } from 'marked';
+import { jsPDF } from 'jspdf';
 
 export default function PurchasingClientPage() {
   const { items } = useInventory();
@@ -48,11 +49,16 @@ export default function PurchasingClientPage() {
     });
   };
 
+  // Automatically generate the report on page load
+  useEffect(() => {
+    handleGenerateReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleDownloadReport = async () => {
     if (!reportRef.current) return;
 
     try {
-        const { default: jsPDF } = await import('jspdf');
         const canvas = await html2canvas(reportRef.current, {
             scale: 2, // Higher scale for better quality
         });
@@ -87,15 +93,15 @@ export default function PurchasingClientPage() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Smart Reordering</CardTitle>
+          <CardTitle>AI-Powered Purchasing</CardTitle>
           <CardDescription>
-            Automatically generate purchase order proposals for items that have fallen below their reorder threshold.
+            Generate purchase order proposals for items below their reorder threshold or identified as high-demand.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={handleGenerateReport} disabled={isPending}>
             <Wand2 className="mr-2 h-4 w-4" />
-            {isPending ? 'Generating...' : 'Generate Purchase Orders'}
+            {isPending ? 'Generating...' : 'Regenerate Report'}
           </Button>
         </CardContent>
       </Card>
@@ -134,7 +140,7 @@ export default function PurchasingClientPage() {
                     Generated on {new Date().toLocaleString()}
                 </CardDescription>
             </div>
-            <Button variant="outline" onClick={handleDownloadReport}>
+            <Button variant="outline" onClick={handleDownloadReport} disabled={!reportHtml}>
                 <Download className="mr-2 h-4 w-4" />
                 Download PDF
             </Button>
