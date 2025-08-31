@@ -1,4 +1,3 @@
-
 'use client';
 
 import { InventoryItem } from '@/lib/types';
@@ -12,9 +11,35 @@ const initialDemoData: InventoryItem[] = [
   { id: '5', name: 'External Hard Drive', type: 'Accessories', dateAdded: new Date().toISOString(), status: 'Low Stock', quantity: 2, imageUrl: 'https://picsum.photos/400/300?id=5', location: 'Storage', supplier: 'DataSafe', reorderThreshold: 3, reorderQuantity: 15 },
 ];
 
+function isValidInventoryItem(item: any): item is InventoryItem {
+  if (typeof item !== 'object' || item === null) return false;
+  if (typeof item.id !== 'string') return false;
+  if (typeof item.name !== 'string') return false;
+  if (typeof item.type !== 'string') return false;
+  if (typeof item.dateAdded !== 'string') return false;
+  if (typeof item.status !== 'string') return false;
+  if (typeof item.quantity !== 'number') return false;
+  if (typeof item.imageUrl !== 'string') return false;
+  if (typeof item.location !== 'string') return false;
+  if (typeof item.supplier !== 'string') return false;
+  if (typeof item.reorderThreshold !== 'number') return false;
+  if (typeof item.reorderQuantity !== 'number') return false;
+  // Optional fields
+  if ('expiryDate' in item && typeof item.expiryDate !== 'string') return false;
+  if ('nextMaintenanceDate' in item && typeof item.nextMaintenanceDate !== 'string') return false;
+  return true;
+}
+
+function validateInventoryData(data: any): InventoryItem[] {
+  if (!Array.isArray(data)) return initialDemoData;
+  const validItems = data.filter(isValidInventoryItem);
+  // Only keep valid items; if none are valid, fall back to demo data
+  return validItems.length > 0 ? validItems : initialDemoData;
+}
 
 export function useInventory() {
-  const [items, setItems] = useLocalStorage<InventoryItem[]>('inventory', initialDemoData);
+  const [rawItems, setItems] = useLocalStorage<any[]>('inventory', initialDemoData);
+  const items = validateInventoryData(rawItems);
 
   const addItem = (item: Omit<InventoryItem, 'id' | 'dateAdded'>) => {
     const newItem: InventoryItem = {
