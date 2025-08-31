@@ -56,21 +56,48 @@ export default function PurchasingClientPage() {
   }, []);
 
   const handleDownloadReport = async () => {
-    if (!reportRef.current) return;
+    const reportElement = reportRef.current;
+    if (!reportElement) return;
 
     try {
-        const canvas = await html2canvas(reportRef.current, {
+        const canvas = await html2canvas(reportElement, {
             scale: 2, // Higher scale for better quality
+            backgroundColor: '#ffffff', // Force a white background for the PDF
+            onclone: (document) => {
+                // Remove dark mode styles from the cloned element for PDF generation
+                document.getElementById(reportElement.id)?.classList.remove('dark:prose-invert');
+            }
         });
-        const imgData = canvas.toDataURL('image/png');
         
+        const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
-            orientation: 'p',
+            orientation: 'portrait',
             unit: 'px',
-            format: [canvas.width, canvas.height]
+            format: 'a4' // Use a standard page size
         });
 
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const canvasAspectRatio = canvasWidth / canvasHeight;
+        const pdfAspectRatio = pdfWidth / pdfHeight;
+
+        let finalWidth, finalHeight;
+
+        if (canvasAspectRatio > pdfAspectRatio) {
+            finalWidth = pdfWidth;
+            finalHeight = pdfWidth / canvasAspectRatio;
+        } else {
+            finalHeight = pdfHeight;
+            finalWidth = pdfHeight * canvasAspectRatio;
+        }
+        
+        // Center the image on the page
+        const x = (pdfWidth - finalWidth) / 2;
+        const y = 0; // Start from top
+
+        pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
         pdf.save(`purchase-orders-${new Date().toISOString().split('T')[0]}.pdf`);
 
     } catch (error) {
@@ -146,7 +173,7 @@ export default function PurchasingClientPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div ref={reportRef} className="prose prose-sm dark:prose-invert max-w-none p-4 bg-background" dangerouslySetInnerHTML={{ __html: reportHtml }}>
+            <div id="report-content" ref={reportRef} className="prose prose-sm dark:prose-invert max-w-none p-4 bg-background" dangerouslySetInnerHTML={{ __html: reportHtml }}>
             </div>
           </CardContent>
         </Card>
