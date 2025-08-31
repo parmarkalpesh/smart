@@ -18,7 +18,7 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  // Only allow login as 'staff' (least privilege)
+  // Only allow login as 'staff' to prevent client-side privilege escalation
   const handleLogin = () => {
     login('staff');
     router.push('/dashboard');
@@ -44,10 +44,4 @@ export default function LoginPage() {
             variant="secondary"
           >
             <User className="mr-2 h-4 w-4" />
-            Log in
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+            Log in as Staff
