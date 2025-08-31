@@ -2,7 +2,6 @@
 /**
  * @fileOverview Generates inventory analytics insights using AI.
  *
- * - generateAnalyticsInsights - A function that analyzes inventory data.
  * - GenerateAnalyticsInsightsInput - The input type for the function.
  * - GenerateAnalyticsInsightsOutput - The return type for the function.
  */
@@ -28,12 +27,17 @@ const GenerateAnalyticsInsightsOutputSchema = z.object({
   slowMovingStock: z.array(InsightItemSchema).describe('List of items identified as slow-moving.'),
   seasonalTrends: z.string().describe('Analysis of potential seasonal trends or other time-based patterns.'),
   iotShelfInsights: z.string().describe('A summary of insights derived from simulated IoT shelf weight data, if available.'),
+  iotShelfInsights: z.string().describe('A summary of insights derived from simulated IoT shelf weight data, if available.'),
 });
 export type GenerateAnalyticsInsightsOutput = z.infer<typeof GenerateAnalyticsInsightsOutputSchema>;
 
 function escapeForPrompt(str: string): string {
   // Escapes curly braces, backticks, and angle brackets to prevent prompt injection
   return str.replace(/[{}<>`]/g, c => ({'{': '\u007b', '}': '\u007d', '<': '\u003c', '>': '\u003e', '`': '\u0060'}[c] || c));
+}
+
+export async function generateAnalyticsInsights(input: GenerateAnalyticsInsightsInput): Promise<GenerateAnalyticsInsightsOutput> {
+  return generateAnalyticsInsightsFlow(input);
 }
 
 export async function generateAnalyticsInsights(input: GenerateAnalyticsInsightsInput): Promise<GenerateAnalyticsInsightsOutput> {
@@ -61,14 +65,19 @@ You are provided with the current inventory data. Your task is to analyze this d
 Generate a full JSON output based on these instructions. Be insightful and concise.
 `,
 });
-
-const generateAnalyticsInsightsFlow = ai.defineFlow(
-  {
-    name: 'generateAnalyticsInsightsFlow',
     inputSchema: GenerateAnalyticsInsightsInputSchema,
     outputSchema: GenerateAnalyticsInsightsOutputSchema,
   },
   async input => {
+    // Sanitize inventoryData before passing to the prompt
+    const sanitizedInput = {
+      ...input,
+      inventoryData: escapeForPrompt(input.inventoryData),
+    };
+    const {output} = await prompt(sanitizedInput);
+    return output!;
+  }
+);
     // Sanitize inventoryData before passing to the prompt
     const sanitizedInput = {
       ...input,
