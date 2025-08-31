@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Generates inventory analytics insights using AI.
@@ -31,6 +30,11 @@ const GenerateAnalyticsInsightsOutputSchema = z.object({
   iotShelfInsights: z.string().describe('A summary of insights derived from simulated IoT shelf weight data, if available.'),
 });
 export type GenerateAnalyticsInsightsOutput = z.infer<typeof GenerateAnalyticsInsightsOutputSchema>;
+
+function escapeForPrompt(str: string): string {
+  // Escapes curly braces, backticks, and angle brackets to prevent prompt injection
+  return str.replace(/[{}<>`]/g, c => ({'{': '\u007b', '}': '\u007d', '<': '\u003c', '>': '\u003e', '`': '\u0060'}[c] || c));
+}
 
 export async function generateAnalyticsInsights(input: GenerateAnalyticsInsightsInput): Promise<GenerateAnalyticsInsightsOutput> {
   return generateAnalyticsInsightsFlow(input);
@@ -65,7 +69,12 @@ const generateAnalyticsInsightsFlow = ai.defineFlow(
     outputSchema: GenerateAnalyticsInsightsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    // Sanitize inventoryData before passing to the prompt
+    const sanitizedInput = {
+      ...input,
+      inventoryData: escapeForPrompt(input.inventoryData),
+    };
+    const {output} = await prompt(sanitizedInput);
     return output!;
   }
 );
