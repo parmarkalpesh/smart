@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useTransition, useRef, useMemo, useEffect } from 'react';
@@ -14,6 +13,22 @@ import { Separator } from '@/components/ui/separator';
 import html2canvas from 'html2canvas';
 import { marked } from 'marked';
 import { jsPDF } from 'jspdf';
+
+// Configure marked to disable HTML output entirely
+marked.setOptions({
+  headerIds: false,
+  mangle: false,
+  breaks: true,
+  gfm: true,
+  sanitize: false, // deprecated, but set for clarity
+  smartLists: true,
+  smartypants: false,
+  xhtml: false,
+});
+// Remove all HTML tags from output by overriding renderer
+const renderer = new marked.Renderer();
+renderer.html = () => '';
+marked.use({ renderer });
 
 export default function PurchasingClientPage() {
   const { items } = useInventory();
@@ -118,6 +133,7 @@ export default function PurchasingClientPage() {
   
   const reportHtml = useMemo(() => {
     if (!report) return '';
+    // marked is now configured to never output HTML tags from user input
     return marked(report) as string;
   }, [report]);
 
