@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Generates purchase order proposals for items below their reorder threshold.
@@ -21,8 +20,45 @@ const GeneratePurchaseOrdersOutputSchema = z.object({
 });
 export type GeneratePurchaseOrdersOutput = z.infer<typeof GeneratePurchaseOrdersOutputSchema>;
 
+function sanitizeInventoryData(input: string): string {
+  // Attempt to parse the input as JSON. If it fails, return an empty array string.
+  let parsed;
+  try {
+    parsed = JSON.parse(input);
+    if (!Array.isArray(parsed)) {
+      // If not an array, treat as invalid
+      return '[]';
+    }
+    // Only allow expected fields and escape dangerous characters in string fields
+    const allowedFields = ['name', 'quantity', 'reorderThreshold', 'reorderQuantity', 'supplier'];
+    const escape = (str: string) =>
+      str.replace(/[{}\\`$<>|]/g, c => ({'{': '\\{', '}': '\\}', '`': '\\`', '$': '\\$', '<': '&lt;', '>': '&gt;', '|': '\\|', '\\': '\\\\'}[c] || c));
+    const sanitized = parsed.map((item: any) => {
+      const clean: any = {};
+      for (const key of allowedFields) {
+        if (Object.prototype.hasOwnProperty.call(item, key)) {
+          if (typeof item[key] === 'string') {
+            clean[key] = escape(item[key]);
+          } else {
+            clean[key] = item[key];
+          }
+        }
+      }
+      return clean;
+    });
+    return JSON.stringify(sanitized);
+  } catch {
+    return '[]';
+  }
+}
+
 export async function generatePurchaseOrders(input: GeneratePurchaseOrdersInput): Promise<GeneratePurchaseOrdersOutput> {
-  return generatePurchaseOrdersFlow(input);
+  // Sanitize inventoryData before passing to the flow
+  const sanitizedInput = {
+    ...input,
+    inventoryData: sanitizeInventoryData(input.inventoryData),
+  };
+  return generatePurchaseOrdersFlow(sanitizedInput);
 }
 
 const prompt = ai.definePrompt({
@@ -45,7 +81,7 @@ The quantity to order is defined by 'reorderQuantity', defaulting to 50 if not s
     *   The current date.
     *   A markdown table with the columns: "Item Name", "Current Quantity", and "Reorder Quantity".
     *   A concluding line with a placeholder for a signature.
-4.  **Combine Proposals:** Combine all generated purchase order proposals into a single markdown string. Separate each section with a horizontal rule (\`---\`).
+4.  **Combine Proposals:** Combine all generated purchase order proposals into a single markdown string. Separate each section with a horizontal rule (`---`).
 5.  **Handle No Reorders:** If no items need reordering, the report should clearly state: "All inventory levels are sufficient. No purchase orders are needed at this time."
 
 Inventory Data: {{{inventoryData}}}
