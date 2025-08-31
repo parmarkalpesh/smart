@@ -27,9 +27,6 @@ export interface InventoryItem {
   voiceNotes?: VoiceNote[];
   reorderThreshold?: number;
   reorderQuantity?: number;
-  deliveryStatus?: DeliveryStatus;
-  expectedDeliveryDate?: string; // ISO string
-  alternativeSuppliers?: string[];
 }
 
 export interface GoogleUser {
